@@ -47,8 +47,6 @@ src/
 ├── config/
 └── main.tsx
 
-
-
 ---
 
 ## 🔐 Authentication & Authorization
