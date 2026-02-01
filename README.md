@@ -19,32 +19,34 @@ This repository contains the web client built with modern React tooling and a sc
 
 ## 📁 Project Structure
 
-The project follows a **feature-based architecture** with a clear separation between app-level configuration, shared resources, and domain features.
+The project follows a **feature-based architecture** with a clear separation between
+application-level configuration, shared resources, and domain features.
 
+```text
 src/
+├── app/                # Application shell (router, providers, global styles)
+│   ├── providers/
+│   ├── router/
+│   └── styles/
 │
-├── app/ # Application shell (router, providers, global styles)
-│ ├── providers/
-│ ├── router/
-│ └── styles/
+├── features/           # Domain features
+│   ├── auth/
+│   ├── customers/
+│   ├── loans/
+│   ├── payments/
+│   └── notifications/
 │
-├── features/ # Domain features
-│ ├── auth/
-│ ├── customers/
-│ ├── loans/
-│ ├── payments/
-│ └── notifications/
-│
-├── shared/ # Reusable resources
-│ ├── components/
-│ ├── hooks/
-│ ├── services/
-│ ├── types/
-│ └── utils/
+├── shared/             # Reusable resources
+│   ├── components/
+│   ├── hooks/
+│   ├── services/
+│   ├── types/
+│   └── utils/
 │
 ├── assets/
 ├── config/
 └── main.tsx
+
 
 
 ---
