@@ -1,32 +1,24 @@
-import type { LoginRequest, LoginResponse } from "../types/auth.types";
+import api from '@/shared/services/api';
+import type { AuthResponse, LoginRequest } from '../types/auth.types';
 
-export interface AuthService {
-  login: (data: LoginRequest) => Promise<LoginResponse>;
-  logout: () => Promise<void>;
-}
+const BASE_PATH = '/api/v1/account';
 
-export const mockAuthService: AuthService = {
-  async login(data) {
-
-    await new Promise((r) => setTimeout(r, 500));
-
-    const roleByEmail =
-      data.email.includes("admin") ? (["ADMIN"] as const) :
-      data.email.includes("officer") ? (["OFFICER"] as const) :
-      data.email.includes("collector") ? (["COLLECTOR"] as const) :
-      (["CLIENT"] as const);
-
-    return {
-      token: "mock-token-123",
-      user: {
-        id: "1",
-        fullName: "Anyelys Torres",
-        roles: [...roleByEmail],
-      },
-    };
+export const authService = {
+  login: async (credentials: LoginRequest): Promise<AuthResponse> => {
+    const { data } = await api.post<AuthResponse>(`${BASE_PATH}/login`, credentials);
+    return data;
   },
 
-  async logout() {
-    await Promise.resolve();
+  logout: async (): Promise<void> => {
+    try {
+      await api.get(`${BASE_PATH}/logout`);
+    } finally {
+      localStorage.removeItem('auth_token');
+    }
   },
+
+  refreshAccessToken: async (): Promise<AuthResponse> => {
+    const { data } = await api.get<AuthResponse>(`${BASE_PATH}/refresh-access-token`);
+    return data;
+  }
 };

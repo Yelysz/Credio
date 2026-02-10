@@ -20,7 +20,7 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login({ email, password });
+      await login({ userName: email, password });
       toast.success("Sesión iniciada");
       nav(from, { replace: true });
     } catch {
@@ -56,7 +56,7 @@ export function LoginPage() {
           <section className="space-y-6">
             <Input 
               label="Correo Electrónico" 
-              type="email"
+              type="text"
               autoComplete="email"
               required
               placeholder="admin@credio.com"
