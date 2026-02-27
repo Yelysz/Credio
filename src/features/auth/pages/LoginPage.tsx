@@ -10,8 +10,8 @@ export function LoginPage() {
   const nav = useNavigate();
   const location = useLocation();
 
-  const [email, setEmail] = useState("admin@credio.com");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("superAdminUser");
+  const [password, setPassword] = useState("1505Pa@@word");
   const [loading, setLoading] = useState(false);
 
   const from = location.state?.from ?? "/";
