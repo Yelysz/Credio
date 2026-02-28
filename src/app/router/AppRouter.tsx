@@ -5,7 +5,7 @@ import { RoleGuard } from "./RoleGuard";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/Dashboard/types";
 import type { Role } from "@/features/auth/types/auth.types";
-import { Employees } from "@/features/auth/pages/employees/employeesList";
+import { Employees } from "@/features/employee/employees/employeesList";
 import { ROLES } from "@/features/layout/constants/role";
 
 

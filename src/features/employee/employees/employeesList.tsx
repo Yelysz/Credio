@@ -1,45 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CirclePlus, Search, Trash2, FilePenLine, Eye } from 'lucide-react';
 import { Button, Modal } from '@/shared/components';
+import type { Employee } from '@/shared/models/Employee';
+import { getEmployees } from '@/shared/services/employees';
 export function Employees() {
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
   const [openModal, setOpenModal] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const empleados = [
-    {
-      id: 1,
-      cedula: "1-1234-5678",
-      nombre: "Alejandro",
-      apellido: "Rodríguez",
-      rol: "Desarrollador Senior",
-      activo: true
-    },
-    {
-      id: 2,
-      cedula: "8-7654-3210",
-      nombre: "Beatriz",
-      apellido: "López",
-      email: "rlopezm6@gmail.com",
-      activo: true
-    },
-    {
-      id: 3,
-      cedula: "4-0987-6543",
-      nombre: "Carlos",
-      apellido: "Mendoza",
-      email: "rlopezm6@gmail.com",
-      activo: false
-    },
-    {
-      id: 4,
-      cedula: "2-4567-8901",
-      nombre: "Diana",
-      apellido: "García",
-      email: "rlopezm6@gmail.com",
-      activo: true
-    }
-  ];
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        setLoading(true);
+        const data = await getEmployees();
+        setEmployees(data);
+      } catch (error) {
+        console.error("Error obteniendo empleados:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   // const prestamosFiltrados = mockPrestamos.filter((p: any) => {
   //   const matchEstado = filtroEstado === 'todos' || p.estado === filtroEstado;
@@ -116,26 +101,35 @@ export function Employees() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Idenitdad</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo de documento</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documento</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correo Electrónico</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dirección</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ciudad</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sector</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {empleados.map((empleado: any) => (
-                <tr key={empleado.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{empleado.id}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{empleado.nombre}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{empleado.cedula}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{empleado.email}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${empleado.activo ? 'bg-green-100 text-green-700' :
+              {employees.map((employee: any) => (
+                <tr key={employee.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{employee.id}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{employee.firstName + " " + employee.lastName}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{employee.documentType}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{employee.documentNumber}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{employee.email}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600"> {employee.address.streetNumber + " " 
+                  + employee.address.addressLine1 + " " 
+                  + employee.address.addressLine2}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{employee.address.city}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{employee.address.region}</td>
+                  {/* <td className="px-6 py-4">
+                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${employee.activo ? 'bg-green-100 text-green-700' :
                       'bg-red-100 text-red-700'
                       }`}>
-                      {empleado.activo ? 'Activo' : 'Inactivo'}
+                      {employee.activo ? 'Activo' : 'Inactivo'}
                     </span>
-                  </td>
+                  </td> */}
                   <td className="flex h-16 w-16 items-center justify-center">
                     <a className="btn btn-sm btn-light-warning btn-icon mr-2">
                       <FilePenLine className="w-5 h-5 " />
@@ -157,7 +151,7 @@ export function Employees() {
         open={openModal}
         title="Agregar empleado"
         onClose={() => setOpenModal(false)}
-        size="full"
+        size="xl"
         maxHeight="max-h-[90vh]"
         closeOnOverlayClick={false}
         footer={

@@ -3,7 +3,7 @@ import { cn } from "../../utils/cn";
 import { Button } from "./Button";
 import { X } from "lucide-react"; // Usaremos un icono para un look más limpio
 
-type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
+type ModalSize = "sm" | "md" | "lg" | "xl";
 
 type Props = {
   open: boolean;
@@ -22,7 +22,6 @@ const sizeClasses: Record<ModalSize, string> = {
   md: "max-w-lg",
   lg: "max-w-2xl",
   xl: "max-w-4xl",
-  full: "max-w-7xl",
 };
 
 export function Modal({ open, title, onClose, children, footer, className, closeOnOverlayClick = true, size, maxHeight }: Props) {
