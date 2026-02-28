@@ -4,6 +4,7 @@ import { RoleGuard } from "./RoleGuard";
 
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import type { Role } from "@/features/auth/types/auth.types";
+import { Employees } from "@/features/auth/pages/employees/employeesList";
 
 function DashboardPage() {
   return (
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/employees",
+    element: <Employees />,
   },
   {
     path: "/",
