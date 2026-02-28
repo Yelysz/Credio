@@ -3,17 +3,18 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleGuard } from "./RoleGuard";
 
 import { LoginPage } from "@/features/auth/pages/LoginPage";
+import { DashboardPage } from "@/features/Dashboard/types";
 import type { Role } from "@/features/auth/types/auth.types";
 import { Employees } from "@/features/auth/pages/employees/employeesList";
+import { ROLES } from "@/features/layout/constants/role";
 
-function DashboardPage() {
-  return (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold">Dashboard</h1>
-      <p className="mt-2 text-slate-600">Bienvenida a Credio</p>
-    </div>
-  );
-}
+
+const dashboardStats = {
+  carteraTotal: "$2,850,000",
+  liquidez: "$425,000",
+  mora: "$185,000",
+  activos: 127
+};
 
 function AccessDeniedPage() {
   return (
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
+  
   {
     path: "/employees",
     element: <Employees />,
@@ -46,7 +48,10 @@ const router = createBrowserRouter([
     path: "/",
     element: (
       <ProtectedRoute>
-        <DashboardPage />
+        <DashboardPage 
+        cfg={ROLES.admin} 
+        stats={dashboardStats} 
+       />
       </ProtectedRoute>
     ),
   },
@@ -54,7 +59,7 @@ const router = createBrowserRouter([
     path: "/admin",
     element: (
       <ProtectedRoute>
-        <RoleGuard allowed={["ADMIN"] as Role[]}>
+        <RoleGuard allowed={['Administrator'] as Role[]}>
           <div className="p-6">Panel Admin</div>
         </RoleGuard>
       </ProtectedRoute>
