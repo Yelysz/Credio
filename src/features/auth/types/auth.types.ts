@@ -1,24 +1,40 @@
-export type Role = "ADMIN" | "OFFICER" | "COLLECTOR" | "CLIENT";
 
-export interface AuthUser {
+export const Roles = {
+  SuperAdmin: 'SuperAdmin',
+  Administrator: 'Administrator',
+  Client: 'Client',
+  Collector: 'Collector',
+  Officer: 'Officer',
+} as const;
+
+export type Role = (typeof Roles)[keyof typeof Roles];
+
+export interface LoginRequest {
+  userName: string;     
+  password: string;     
+}
+
+
+export interface User {
   id: string;
-  fullName: string;
-  roles: Role[];
+  email: string;
+  role: Role;
+  firstName: string;
+  lastName: string;
+}
+
+export interface AuthResponse {
+  jwToken: string; 
+  expiresIn: string;
+  expiresAt: string;
+  refreshToken: string;
+  refreshExpiresIn: string;
+  refreshExpiresAt: string;
 }
 
 export interface AuthState {
-  user: AuthUser | null;
+  user: User | null;
   token: string | null;
-}
-
-/** Request*/
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-/** Response*/
-export interface LoginResponse {
-  token: string;
-  user: AuthUser;
+  isAuthenticated: boolean;
+  isLoading: boolean;
 }

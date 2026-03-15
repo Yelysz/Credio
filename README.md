@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# Credio – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Credio is a frontend MVP for a credit and loan management platform.  
+This repository contains the web client built with modern React tooling and a scalable architecture designed for team collaboration.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🧩 Tech Stack
 
-## React Compiler
+- **React** (Functional Components)
+- **TypeScript**
+- **Vite**
+- **React Router**
+- **Tailwind CSS**
+- **ESLint**
+- **Lucide Icons**
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+---
 
-## Expanding the ESLint configuration
+## 📁 Project Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The project follows a **feature-based architecture** with a clear separation between
+application-level configuration, shared resources, and domain features.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```text
+src/
+├── app/                # Application shell (router, providers, global styles)
+│   ├── providers/
+│   ├── router/
+│   └── styles/
+│
+├── features/           # Domain features
+│   ├── auth/
+│   ├── customers/
+│   ├── loans/
+│   ├── payments/
+│   └── notifications/
+│
+├── shared/             # Reusable resources
+│   ├── components/
+│   ├── hooks/
+│   ├── services/
+│   ├── types/
+│   └── utils/
+│
+├── assets/
+├── config/
+└── main.tsx
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🔐 Authentication & Authorization
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- Authentication state is handled via **AuthProvider**
+- Access control is implemented using:
+  - `ProtectedRoute` (authentication)
+  - `RoleGuard` (role-based authorization)
+- Roles supported:
+  - `ADMIN`
+  - `OFFICER`
+  - `COLLECTOR`
+  - `CLIENT`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🌿 Git Workflow
+
+This project uses a **Git Flow–inspired workflow**.
+
+### Main branches
+- `main` → Production-ready code
+- `develop` → Integration branch
+
+### Supporting branches
+- `feature/*` → New features
+- `fix/*` → Bug fixes
+- `chore/*` → Configuration / setup changes
+- `refactor/*` → Code refactors
+- `release/*` → Release preparation
+
+> ❌ No direct commits to `main` or `develop`
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone the repository
+```bash
+git clone <repository-url>
+cd credio-frontend
+
+
+npm install
+npm run dev
+http://localhost:5173
