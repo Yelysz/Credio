@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CirclePlus, Search, Trash2, FilePenLine, Eye } from 'lucide-react';
 import { Button, Modal } from '@/shared/components';
 import type { Employee } from '@/shared/models/Employee';
-import { getEmployees } from '@/shared/services/employees';
+import { getEmployees } from '@/features/employee/services/employees';
 export function Employees() {
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
@@ -25,13 +25,6 @@ export function Employees() {
 
     fetchEmployees();
   }, []);
-
-  // const prestamosFiltrados = mockPrestamos.filter((p: any) => {
-  //   const matchEstado = filtroEstado === 'todos' || p.estado === filtroEstado;
-  //   const matchBusqueda = p.clienteNombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-  //     p.id.toLowerCase().includes(busqueda.toLowerCase());
-  //   return matchEstado && matchBusqueda;
-  // });
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
@@ -118,11 +111,11 @@ export function Employees() {
                   <td className="px-6 py-4 text-sm text-gray-900">{employee.documentType}</td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{employee.documentNumber}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{employee.email}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600"> {employee.address.streetNumber + " " 
+                  {/* <td className="px-6 py-4 text-sm text-gray-600"> {employee.address.streetNumber + " " 
                   + employee.address.addressLine1 + " " 
                   + employee.address.addressLine2}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{employee.address.city}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{employee.address.region}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{employee.address.region}</td> */}
                   {/* <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${employee.activo ? 'bg-green-100 text-green-700' :
                       'bg-red-100 text-red-700'

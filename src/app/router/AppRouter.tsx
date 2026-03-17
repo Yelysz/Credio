@@ -5,8 +5,9 @@ import { RoleGuard } from "./RoleGuard";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/Dashboard/types";
 import type { Role } from "@/features/auth/types/auth.types";
-import { Employees } from "@/features/employee/employees/employeesList";
 import { ROLES } from "@/features/layout/constants/role";
+import { Employees } from "@/features/employee/pages/employeesList";
+import ClientsList from "@/features/clients/pages/clientsList";
 
 
 const dashboardStats = {
@@ -39,19 +40,31 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
-  
+
   {
     path: "/employees",
-    element: <Employees />,
+    element: (
+      // <ProtectedRoute>
+        <Employees />
+      // </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/clients",
+    element: (
+      // <ProtectedRoute>
+        <ClientsList />
+      // </ProtectedRoute>
+    ),
   },
   {
     path: "/",
     element: (
       <ProtectedRoute>
-        <DashboardPage 
-        cfg={ROLES.admin} 
-        stats={dashboardStats} 
-       />
+        <DashboardPage
+          cfg={ROLES.admin}
+          stats={dashboardStats}
+        />
       </ProtectedRoute>
     ),
   },
