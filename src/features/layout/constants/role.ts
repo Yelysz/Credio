@@ -1,4 +1,3 @@
-// src/features/layout/constants/role.ts
 
 export const T = {
   green900: "#1E2D14", green800: "#2C3A20", green700: "#3D5C28",
@@ -27,6 +26,7 @@ export const ROLES = {
     ],
     greeting: (n: string) => `Bienvenido, ${n}`
   },
+
   oficial: {
     label: "Oficial de Crédito",
     accent: T.blue500,
@@ -40,6 +40,7 @@ export const ROLES = {
     ],
     greeting: (n: string) => `Hola, ${n}`
   },
+
   cobrador: {
     label: "Cobrador",
     accent: T.orange500,
@@ -52,6 +53,7 @@ export const ROLES = {
     ],
     greeting: (n: string) => `Buenos días, ${n}`
   },
+
   cliente: {
     label: "Cliente",
     accent: T.indigo500,
@@ -65,4 +67,6 @@ export const ROLES = {
     ],
     greeting: (n: string) => `¡Hola, ${n}!`
   }
-};
+} as const;
+
+export type Role = keyof typeof ROLES;
