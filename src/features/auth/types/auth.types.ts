@@ -24,12 +24,17 @@ export interface User {
 }
 
 export interface AuthResponse {
-  jwToken: string; 
-  expiresIn: string;
-  expiresAt: string;
-  refreshToken: string;
-  refreshExpiresIn: string;
-  refreshExpiresAt: string;
+  data: {
+    expiresAt: string;
+    expiresIn: string;
+    jwToken: string;
+    refreshExpiresAt: string;
+    refreshExpiresIn: string;
+    refreshToken: string;
+  };
+  detail: string;
+  statusCode: number;
+  type: string;
 }
 
 export interface AuthState {

@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleGuard } from "./RoleGuard";
 
@@ -9,12 +9,11 @@ import { ROLES } from "@/features/layout/constants/role";
 import { Employees } from "@/features/employee/pages/employeesList";
 import ClientsList from "@/features/clients/pages/clientsList";
 
-
 const dashboardStats = {
   carteraTotal: "$2,850,000",
   liquidez: "$425,000",
   mora: "$185,000",
-  activos: 127
+  activos: 127,
 };
 
 function AccessDeniedPage() {
@@ -89,5 +88,34 @@ const router = createBrowserRouter([
 ]);
 
 export function AppRouter() {
-  return <RouterProvider router={router} />;
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+
+      <Route path="/employees" element={<Employees />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DashboardPage cfg={ROLES.admin} stats={dashboardStats} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowed={['Administrator'] as Role[]}>
+              <div className="p-6">Panel Admin</div>
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="/access-denied" element={<AccessDeniedPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
 }

@@ -9,9 +9,27 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
-  if (token && config.headers) {
+  const url = config.url ?? '';
+
+  const publicEndpoints = [
+    '/login',
+    '/register-client',
+    '/reset-password',
+    '/confirm-code',
+    '/confirm-email',
+    '/thanks',
+    '/refresh-access-token',
+    '/validate-refresh-token'
+  ];
+
+  const isPublic = publicEndpoints.some((endpoint) =>
+    url.includes(endpoint)
+  );
+
+  if (token && config.headers && !isPublic) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
