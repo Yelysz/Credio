@@ -19,10 +19,10 @@ export const ROLES = {
     badge: T.green400,
     icon: "⚙️",
     nav: [
-      { id: "dashboard", icon: "▣", label: "Dashboard de Liquidez" },
-      { id: "clientes", icon: "👥", label: "Gestión de Clientes" },
-      { id: "reportes", icon: "📊", label: "Reportes de Cartera" },
-      { id: "config", icon: "⚙️", label: "Configuración" }
+      { id: "dashboard", icon: "▣", label: "Dashboard de Liquidez", path: "/" },
+      { id: "employees", icon: "👥", label: "Gestión de Empleados", path: "/employees" },
+      { id: "reportes", icon: "📊", label: "Reportes de Cartera", path: "/reportes" },
+      { id: "config", icon: "⚙️", label: "Configuración", path: "/config" }
     ],
     greeting: (n: string) => `Bienvenido, ${n}`
   },
@@ -34,9 +34,9 @@ export const ROLES = {
     badge: "#3B82F6",
     icon: "🪪",
     nav: [
-      { id: "clientes", icon: "👥", label: "Gestión de Clientes" },
-      { id: "solicitudes", icon: "📋", label: "Solicitudes de Crédito" },
-      { id: "aprobacion", icon: "✅", label: "Bandeja de Aprobación" }
+      { id: "clientes", icon: "👥", label: "Gestión de Clientes", path: "/clientes" },
+      { id: "solicitudes", icon: "📋", label: "Solicitudes de Crédito", path: "/solicitudes" },
+      { id: "aprobacion", icon: "✅", label: "Bandeja de Aprobación", path: "/aprobacion" }
     ],
     greeting: (n: string) => `Hola, ${n}`
   },
@@ -48,8 +48,8 @@ export const ROLES = {
     badge: T.orange700,
     icon: "💼",
     nav: [
-      { id: "cartera", icon: "💼", label: "Mi Cartera" },
-      { id: "historial", icon: "🧾", label: "Historial de Recibos" }
+      { id: "cartera", icon: "💼", label: "Mi Cartera", path: "/cartera" },
+      { id: "historial", icon: "🧾", label: "Historial de Recibos", path: "/historial" }
     ],
     greeting: (n: string) => `Buenos días, ${n}`
   },
@@ -61,9 +61,9 @@ export const ROLES = {
     badge: "#6366F1",
     icon: "👤",
     nav: [
-      { id: "prestamos", icon: "💳", label: "Mis Préstamos" },
-      { id: "facturas", icon: "🧾", label: "Facturas y Pagos" },
-      { id: "contactar", icon: "💬", label: "Contactar Oficial" }
+      { id: "prestamos", icon: "💳", label: "Mis Préstamos", path: "/prestamos" },
+      { id: "facturas", icon: "🧾", label: "Facturas y Pagos", path: "/facturas" },
+      { id: "contactar", icon: "💬", label: "Contactar Oficial", path: "/contactar" }
     ],
     greeting: (n: string) => `¡Hola, ${n}!`
   }

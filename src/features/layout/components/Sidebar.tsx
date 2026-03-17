@@ -1,4 +1,5 @@
-import React from 'react';
+import React from "react";
+import { NavLink } from "react-router-dom";
 import type { Role, RolesConfig } from "../../../shared/types/layout.types";
 
 const T = {
@@ -17,11 +18,11 @@ const T = {
 interface SidebarProps {
   role: Role;
   user: {
-  name: string;
-  role: Role;
-};
-  activeNav: string;
-  onNav: (id: string) => void;
+    name: string;
+    role: Role;
+  };
+  activeNav?: string;
+  onNav?: (id: string) => void;
   collapsed: boolean;
   onToggle: () => void;
   rolesConfig: RolesConfig;
@@ -36,8 +37,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   rolesConfig,
 }) => {
   const cfg = rolesConfig[user.role];
+
   const initials = user.name
     .split(" ")
+    .filter(Boolean)
     .map((w) => w[0])
     .slice(0, 2)
     .join("")
@@ -98,15 +101,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           overflowY: "auto",
         }}
       >
-        {cfg.nav.map((item) => {
-          const active = item.id === activeNav;
+        {cfg.nav.map((item) => (
+          <NavLink
+            key={item.id}
+            to={item.path}
+            title={collapsed ? item.label : ""}
+            onClick={() => onNav?.(item.id)}
+            style={({ isActive }) => {
+              const active = isActive || item.id === activeNav;
 
-          return (
-            <button
-              key={item.id}
-              onClick={() => onNav(item.id)}
-              title={collapsed ? item.label : ""}
-              style={{
+              return {
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
@@ -116,7 +120,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 borderRadius: collapsed ? 0 : 9,
                 background: active ? cfg.light : "transparent",
                 color: active ? cfg.accent : T.gray600,
-                border: "none",
                 cursor: "pointer",
                 fontSize: 13.5,
                 fontWeight: active ? 600 : 400,
@@ -125,13 +128,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   active && !collapsed
                     ? `3px solid ${cfg.accent}`
                     : "3px solid transparent",
-              }}
-            >
-              <span style={{ fontSize: 15, flexShrink: 0 }}>{item.icon}</span>
-              {!collapsed && item.label}
-            </button>
-          );
-        })}
+                textDecoration: "none",
+                boxSizing: "border-box",
+              };
+            }}
+          >
+            <span style={{ fontSize: 15, flexShrink: 0 }}>{item.icon}</span>
+            {!collapsed && item.label}
+          </NavLink>
+        ))}
       </nav>
 
       <div
@@ -159,7 +164,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             color: T.white,
           }}
         >
-          {initials}
+          {initials || "U"}
         </div>
 
         {!collapsed && (
@@ -216,8 +221,20 @@ function LogoMark({ size = 34, showText = false, onClick }: LogoMarkProps) {
           flexShrink: 0,
         }}
       >
-        <svg width={size * 0.52} height={size * 0.52} viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="10" r="7" stroke="white" strokeWidth="1.8" opacity="0.5" />
+        <svg
+          width={size * 0.52}
+          height={size * 0.52}
+          viewBox="0 0 20 20"
+          fill="none"
+        >
+          <circle
+            cx="10"
+            cy="10"
+            r="7"
+            stroke="white"
+            strokeWidth="1.8"
+            opacity="0.5"
+          />
           <path
             d="M12.5 7C12.5 7 9.5 6 8 7.5C6.5 9 6.5 11 8 12.5C9.5 14 12.5 13 12.5 13"
             stroke="white"

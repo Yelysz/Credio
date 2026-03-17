@@ -1,21 +1,20 @@
-import React from "react";
-
 export type Role = "admin" | "oficial" | "cobrador" | "cliente";
 
 export interface NavItem {
   id: string;
+  icon: string;
   label: string;
-  icon: React.ReactNode;
+  path: string;
 }
 
 export interface RoleConfig {
-  greeting: (name: string) => string;
-  accent: string;
-  badge: string;
-  light: string;
-  icon: React.ReactNode;
   label: string;
+  accent: string;
+  light: string;
+  badge: string;
+  icon: string;
   nav: readonly NavItem[];
+  greeting: (name: string) => string;
 }
 
 export type RolesConfig = Record<Role, RoleConfig>;

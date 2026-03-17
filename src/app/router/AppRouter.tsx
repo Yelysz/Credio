@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RoleGuard } from "./RoleGuard";
-
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { DashboardPage } from "@/features/Dashboard/types";
 import type { Role } from "@/features/auth/types/auth.types";
@@ -26,7 +25,7 @@ function AccessDeniedPage() {
 
 function NotFoundPage() {
   return (
-    <div className="p-6">
+    <div className="p-20 flex justify-center items-center flex-col">
       <h1 className="text-xl font-semibold">404</h1>
       <p className="mt-2 text-slate-600">Página no encontrada.</p>
     </div>
@@ -37,7 +36,6 @@ export function AppRouter() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-
       <Route path="/employees" element={<Employees />} />
 
       <Route
