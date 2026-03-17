@@ -13,13 +13,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const login = async (credentials: LoginRequest) => {
-    // Mapeamos el jwToken de la respuesta al estado
     const response: AuthResponse = await authService.login(credentials);
-    const token = response.jwToken;
+    const token = response.data.jwToken;
     
     localStorage.setItem('auth_token', token);
     
-    // Aquí podrías decodificar el token para obtener el objeto User si tu API no lo envía
     setState(prev => ({ ...prev, token, isAuthenticated: true, isLoading: false }));
   };
 
