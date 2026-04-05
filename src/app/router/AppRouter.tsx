@@ -6,6 +6,7 @@ import { DashboardPage } from "@/features/Dashboard/types";
 import type { Role } from "@/features/auth/types/auth.types";
 import { Employees } from "@/features/employee/employees/employeesList";
 import { ROLES } from "@/features/layout/constants/role";
+import ClientsList from "@/features/clients/pages/ClientsList";
 
 const dashboardStats = {
   carteraTotal: "$2,850,000",
@@ -37,6 +38,7 @@ export function AppRouter() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/employees" element={<Employees />} />
+      <Route path="/clients" element={<ClientsList />} />
 
       <Route
         path="/"

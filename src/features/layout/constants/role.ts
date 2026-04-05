@@ -21,6 +21,7 @@ export const ROLES = {
     nav: [
       { id: "dashboard", icon: "▣", label: "Dashboard de Liquidez", path: "/" },
       { id: "employees", icon: "👥", label: "Gestión de Empleados", path: "/employees" },
+      { id: "clients", icon: "👥", label: "Gestión de Clientes", path: "/clients" },
       { id: "reportes", icon: "📊", label: "Reportes de Cartera", path: "/reportes" },
       { id: "config", icon: "⚙️", label: "Configuración", path: "/config" }
     ],
