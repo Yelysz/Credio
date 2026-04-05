@@ -1,34 +1,141 @@
-import React from 'react';
-import type { RoleConfig } from "../../../shared/types/layout.types"
+import React from "react";
+import { useDashboard } from "../hooks/useDashboard";
 
-// Tokens de color consistentes con tu diseño
 const T = {
   green800: "#2C3A20",
   green400: "#7AAF52",
   gray100: "#F3F4F6",
   gray200: "#E5E7EB",
+  gray300: "#D1D5DB",
   gray400: "#9CA3AF",
   gray600: "#4B5563",
   white: "#FFFFFF",
   red: "#DC2626",
 };
 
-interface DashboardStats {
-  carteraTotal: string;
-  liquidez: string;
-  mora: string;
-  activos: number;
-}
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("es-DO", {
+    style: "currency",
+    currency: "DOP",
+    maximumFractionDigits: 0,
+  }).format(value);
 
-interface DashboardProps {
-  cfg: RoleConfig; 
-  stats: DashboardStats;
-}
+const formatDate = (value?: string) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("es-DO").format(date);
+};
 
-interface LegendItemProps {
-  color: string;
-  label: string;
-  value: string;
+export default function DashboardPage() {
+  const { data, isLoading, error, refetch } = useDashboard();
+
+  if (isLoading) {
+    return (
+      <div>
+        <h2 style={titleStyle}>Dashboard</h2>
+        <div style={panelStyle}>Cargando dashboard...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h2 style={titleStyle}>Dashboard</h2>
+        <div style={panelStyle}>
+          <p style={{ color: T.red, marginBottom: 12 }}>{error}</p>
+          <button onClick={refetch} style={buttonStyle}>
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ animation: "fadeIn 0.3s ease-in-out" }}>
+      <h2 style={titleStyle}>Dashboard</h2>
+
+      <div style={cardsGridStyle}>
+        <StatCard
+          label="Cartera Total"
+          val={formatCurrency(data.carteraTotal)}
+          sub="Resumen general de cartera"
+          color="#2F6B2F"
+          icon="💰"
+        />
+        <StatCard
+          label="Liquidez Disponible"
+          val={formatCurrency(data.liquidezDisponible)}
+          sub="Disponible para desembolsos"
+          color="#059669"
+          icon="📈"
+        />
+        <StatCard
+          label="Mora Total"
+          val={formatCurrency(data.moraTotal)}
+          sub="Monto total en mora"
+          color={T.red}
+          icon="⚠️"
+        />
+        <StatCard
+          label="Préstamos Activos"
+          val={String(data.prestamosActivos)}
+          sub="Cantidad actual de préstamos"
+          color="#7C3AED"
+          icon="👥"
+        />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
+        <div style={panelStyle}>
+          <div style={panelTitleStyle}>Cuotas próximas a vencer</div>
+
+          {data.upcomingInstallments.length === 0 ? (
+            <div style={{ color: T.gray400 }}>
+              No hay cuotas próximas a vencer.
+            </div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={tableStyle}>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>Cliente</th>
+                    <th style={thStyle}>Préstamo</th>
+                    <th style={thStyle}>Cuota</th>
+                    <th style={thStyle}>Fecha vencimiento</th>
+                    <th style={thStyle}>Monto</th>
+                    <th style={thStyle}>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.upcomingInstallments.map((item, index) => (
+                    <tr key={item.id ?? `${item.loanId ?? "loan"}-${index}`}>
+                      <td style={tdStyle}>{item.clientName ?? "—"}</td>
+                      <td style={tdStyle}>
+                        {item.loanNumber ?? item.loanId ?? "—"}
+                      </td>
+                      <td style={tdStyle}>
+                        {item.installmentNumber ?? "—"}
+                      </td>
+                      <td style={tdStyle}>{formatDate(item.dueDate)}</td>
+                      <td style={tdStyle}>
+                        {typeof item.amount !== "undefined"
+                          ? formatCurrency(Number(item.amount))
+                          : "—"}
+                      </td>
+                      <td style={tdStyle}>{item.status ?? "Pendiente"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 interface StatCardProps {
@@ -39,138 +146,50 @@ interface StatCardProps {
   icon: React.ReactNode;
 }
 
-export const DashboardPage: React.FC<DashboardProps> = ({ cfg, stats }) => {
+function StatCard({ label, val, sub, color, icon }: StatCardProps) {
   return (
-    <div style={{ animation: "fadeIn 0.5s ease-in-out" }}>
-      <h2
-        style={{
-          fontFamily: "'Lora', serif",
-          fontSize: 22,
-          fontWeight: 700,
-          color: T.green800,
-          marginBottom: 20,
-        }}
-      >
-        Dashboard de Liquidez
-      </h2>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 14,
-          marginBottom: 24,
-        }}
-      >
-        <StatCard
-          label="Cartera Total"
-          val={stats.carteraTotal}
-          sub="+12.5% vs mes anterior"
-          color={cfg.accent}
-          icon="💰"
-        />
-        <StatCard
-          label="Liquidez Disponible"
-          val={stats.liquidez}
-          sub="Para nuevos desembolsos"
-          color="#059669"
-          icon="📈"
-        />
-        <StatCard
-          label="Mora Total"
-          val={stats.mora}
-          sub="6.5% de la cartera"
-          color={T.red}
-          icon="⚠️"
-        />
-        <StatCard
-          label="Préstamos Activos"
-          val={stats.activos.toString()}
-          sub="15 vencen esta semana"
-          color="#7C3AED"
-          icon="👥"
-        />
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 340px",
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
-        <div style={panelStyle}>
-          <div style={panelTitleStyle}>Flujo de Caja (Últimos 7 meses)</div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              gap: 10,
-              height: 140,
-              padding: "10px 0",
-            }}
-          >
-            {["Jul", "Ago", "Sep", "Oct", "Nov", "Dic", "Ene"].map((m, i) => (
-              <div
-                key={m}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <div
-                  style={{
-                    width: "100%",
-                    height: 40 + i * 15,
-                    background: `linear-gradient(to top, ${cfg.accent}, ${T.green400})`,
-                    borderRadius: "4px 4px 0 0",
-                  }}
-                />
-                <span style={{ fontSize: 10, color: T.gray400 }}>{m}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={panelStyle}>
-          <div style={panelTitleStyle}>Estado de Cartera</div>
-          <div style={{ display: "flex", justifyContent: "center", margin: "20px 0" }}>
-            <svg width="120" height="120" viewBox="0 0 120 120">
-              <circle
-                cx="60"
-                cy="60"
-                r="45"
-                fill="none"
-                stroke={T.gray100}
-                strokeWidth="15"
-              />
-              <circle
-                cx="60"
-                cy="60"
-                r="45"
-                fill="none"
-                stroke="#059669"
-                strokeWidth="15"
-                strokeDasharray="282.7"
-                strokeDashoffset="70"
-                strokeLinecap="round"
-                transform="rotate(-90 60 60)"
-              />
-            </svg>
-          </div>
-          <div style={{ fontSize: 13, color: T.gray600 }}>
-            <LegendItem color="#059669" label="Al Día" value="65%" />
-            <LegendItem color={T.red} label="Vencidos" value="20%" />
-            <LegendItem color="#D97706" label="Por Vencer" value="15%" />
-          </div>
+    <div style={panelStyle}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+        <span style={{ fontSize: 12, color: T.gray400, fontWeight: 500 }}>
+          {label}
+        </span>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: `${color}18`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {icon}
         </div>
       </div>
+
+      <div style={{ fontSize: 26, fontWeight: 700, color, marginBottom: 4 }}>
+        {val}
+      </div>
+
+      <div style={{ fontSize: 11, color: T.gray400 }}>{sub}</div>
     </div>
   );
+}
+
+const titleStyle: React.CSSProperties = {
+  fontFamily: "'Lora', serif",
+  fontSize: 22,
+  fontWeight: 700,
+  color: T.green800,
+  marginBottom: 20,
+};
+
+const cardsGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+  gap: 14,
+  marginBottom: 24,
 };
 
 const panelStyle: React.CSSProperties = {
@@ -188,53 +207,31 @@ const panelTitleStyle: React.CSSProperties = {
   marginBottom: 18,
 };
 
-const LegendItem: React.FC<LegendItemProps> = ({ color, label, value }) => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      padding: "6px 0",
-      borderBottom: `1px solid ${T.gray100}`,
-    }}
-  >
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: "50%",
-          background: color,
-        }}
-      />
-      <span>{label}</span>
-    </div>
-    <span style={{ fontWeight: 700 }}>{value}</span>
-  </div>
-);
+const buttonStyle: React.CSSProperties = {
+  background: "#2F6B2F",
+  color: "#fff",
+  border: "none",
+  borderRadius: 10,
+  padding: "10px 16px",
+  cursor: "pointer",
+};
 
-function StatCard({ label, val, sub, color, icon }: StatCardProps) {
-  return (
-    <div style={panelStyle}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-        <span style={{ fontSize: 12, color: T.gray400, fontWeight: 500 }}>{label}</span>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: `${color}18`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {icon}
-        </div>
-      </div>
-      <div style={{ fontSize: 26, fontWeight: 700, color, marginBottom: 4 }}>{val}</div>
-      <div style={{ fontSize: 11, color: sub.includes("+") ? "#059669" : T.gray400 }}>
-        {sub}
-      </div>
-    </div>
-  );
-}
+const tableStyle: React.CSSProperties = {
+  width: "100%",
+  borderCollapse: "collapse",
+};
+
+const thStyle: React.CSSProperties = {
+  textAlign: "left",
+  padding: "12px",
+  borderBottom: `1px solid ${T.gray200}`,
+  fontSize: 12,
+  color: T.gray600,
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "12px",
+  borderBottom: `1px solid ${T.gray100}`,
+  fontSize: 13,
+  color: T.green800,
+};

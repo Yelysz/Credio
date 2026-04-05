@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const publicEndpoints = [
   "/login",
@@ -11,12 +11,16 @@ const publicEndpoints = [
   "/validate-refresh-token",
 ];
 
+const isPublicEndpoint = (url?: string) => {
+  if (!url) return false;
+  return publicEndpoints.some((endpoint) => url.includes(endpoint));
+};
+
 const attachAuthInterceptor = (instance: ReturnType<typeof axios.create>) => {
-  instance.interceptors.request.use((config) => {
+  instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("auth_token");
     const url = config.url ?? "";
-
-    const isPublic = publicEndpoints.some((endpoint) => url.includes(endpoint));
+    const isPublic = isPublicEndpoint(url);
 
     if (token && config.headers && !isPublic) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -27,7 +31,8 @@ const attachAuthInterceptor = (instance: ReturnType<typeof axios.create>) => {
 };
 
 export const authApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL_AUTH,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -35,14 +40,13 @@ export const authApi = axios.create({
 
 export const lendingApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL_LENDING,
+  withCredentials: true,
   headers: {
-    "Content-Type": "application/json",
-  },
+    "Content-Type": "multipart/form-data"},
 });
 
 attachAuthInterceptor(authApi);
 attachAuthInterceptor(lendingApi);
 
-// Mantén este export para no romper imports existentes que esperan `api`
 export const api = authApi;
 export default authApi;

@@ -1,10 +1,11 @@
-import { createContext } from 'react';
-import type { AuthState, LoginRequest, Role } from '../types/auth.types';
+// AuthContext.ts
+import { createContext } from "react";
+import type { AuthState, LoginRequest, Role } from "../types/auth.types";
 
 export interface AuthContextType {
   state: AuthState;
   isAuthenticated: boolean;
-  login: (data: LoginRequest) => Promise<void>;
+  login: (data: LoginRequest, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   hasAnyRole: (roles: Role[]) => boolean;
 }

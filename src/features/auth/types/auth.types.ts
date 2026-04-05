@@ -1,19 +1,31 @@
-
+// auth.types.ts
 export const Roles = {
-  SuperAdmin: 'SuperAdmin',
-  Administrator: 'Administrator',
-  Client: 'Client',
-  Collector: 'Collector',
-  Officer: 'Officer',
+  SuperAdmin: "SuperAdmin",
+  Administrator: "Administrator",
+  Client: "Client",
+  Collector: "Collector",
+  Officer: "Officer",
 } as const;
 
 export type Role = (typeof Roles)[keyof typeof Roles];
 
 export interface LoginRequest {
-  userName: string;     
-  password: string;     
+  userName: string;
+  password: string;
 }
 
+export interface ResetPasswordRequest {
+  email: string;
+}
+
+export interface ConfirmCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface ChangePasswordRequest {
+  newPassword: string;
+}
 
 export interface User {
   id: string;
