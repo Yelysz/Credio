@@ -1,4 +1,4 @@
-export type Role = "admin" | "oficial" | "cobrador" | "cliente";
+export type Role = "Administrator" | "Officer" | "Collector" | "Client";
 
 export interface NavItem {
   id: string;

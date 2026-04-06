@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AppRouter } from "@/app/router";
 import "./styles/App.css";
@@ -8,6 +8,21 @@ import type { Role } from "../features/layout/constants/role";
 import { ROLES } from "../features/layout/constants/role";
 import { authService } from "@/features/auth/services/auth.service";
 import { getUserFromToken } from "@/shared/utils/auth";
+
+const normalizeRole = (role?: string): Role => {
+  switch (role) {
+    case "Administrator":
+      return "Administrator";
+    case "Officer":
+      return "Officer";
+    case "Collector":
+      return "Collector";
+    case "Client":
+      return "Client";
+    default:
+      return "Client";
+  }
+};
 
 function App() {
   const [collapsed, setCollapsed] = useState(false);
@@ -19,48 +34,25 @@ function App() {
     navigate("/login");
   };
 
+  const tokenUser = getUserFromToken();
+
   const currentUser: {
     name: string;
     email: string;
     role: Role;
-  } = getUserFromToken() ?? {
-    name: "Invitado",
-    email: "",
-    role: "cliente",
-  };
+  } = tokenUser
+    ? {
+        name: tokenUser.name ?? "Usuario",
+        email: tokenUser.email ?? "",
+        role: normalizeRole(tokenUser.role),
+      }
+    : {
+        name: "Invitado",
+        email: "",
+        role: "Client",
+      };
 
   const isLoginPage = location.pathname === "/login";
-
-  const activeNav = useMemo(() => {
-    const path = location.pathname;
-
-    if (path === "/" || path.startsWith("/dashboard")) return "dashboard";
-    if (path.startsWith("/employees")) return "employees";
-    if (path.startsWith("/clients")) return "clients";
-    if (path.startsWith("/loan-applications")) return "loan-applications";
-    if (path.startsWith("/loans")) return "loans";
-    if (path.startsWith("/reports")) return "reports";
-    if (path.startsWith("/settings")) return "settings";
-
-    return "dashboard";
-  }, [location.pathname]);
-
-  const handleSidebarNavigation = (id: string) => {
-    const routeMap: Record<string, string> = {
-      dashboard: "/",
-      employees: "/employees",
-      clients: "/clients",
-      "loan-applications": "/loan-applications",
-      loans: "/loans/preview",
-      reports: "/reports/portfolio",
-      settings: "/settings",
-    };
-
-    const targetRoute = routeMap[id];
-    if (targetRoute) {
-      navigate(targetRoute);
-    }
-  };
 
   if (isLoginPage) {
     return (
@@ -75,8 +67,6 @@ function App() {
       <Sidebar
         role={currentUser.role}
         user={currentUser}
-        activeNav={activeNav}
-        onNav={handleSidebarNavigation}
         collapsed={collapsed}
         onToggle={() => setCollapsed(!collapsed)}
         rolesConfig={ROLES}

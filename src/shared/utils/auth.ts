@@ -10,25 +10,26 @@ interface TokenPayload {
 }
 
 function mapAuthRoleToLayoutRole(roles: AuthRole[]): LayoutRole {
-  if (roles.includes("SuperAdmin") || roles.includes("Administrator")) {
-    return "admin";
+  if (roles.includes("Administrator")) {
+    return "Administrator";
   }
 
   if (roles.includes("Officer")) {
-    return "oficial";
+    return "Officer";
   }
 
   if (roles.includes("Collector")) {
-    return "cobrador";
+    return "Collector";
   }
 
-  return "cliente";
+  return "Client";
 }
 
 export function getUserFromToken(): {
   name: string;
   email: string;
   role: LayoutRole;
+  roles: AuthRole[];
 } | null {
   const rawToken = localStorage.getItem("auth_token");
 
@@ -44,17 +45,19 @@ export function getUserFromToken(): {
     return null;
   }
 
-try {
-  const decoded = jwtDecode<TokenPayload>(token);
+  try {
+    const decoded = jwtDecode<TokenPayload>(token);
+    const roles = decoded.roles ?? [];
 
-  return {
-    name: `${decoded.firstName ?? ""} ${decoded.lastName ?? ""}`.trim(),
-    email: decoded.email ?? "",
-    role: mapAuthRoleToLayoutRole(decoded.roles ?? []),
-  };
-} catch (error) {
-  console.error("Token inválido:", error);
-  localStorage.removeItem("auth_token");
-  return null;
-}
+    return {
+      name: `${decoded.firstName ?? ""} ${decoded.lastName ?? ""}`.trim(),
+      email: decoded.email ?? "",
+      role: mapAuthRoleToLayoutRole(roles),
+      roles,
+    };
+  } catch (error) {
+    console.error("Token inválido:", error);
+    localStorage.removeItem("auth_token");
+    return null;
+  }
 }

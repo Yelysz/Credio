@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { getUserFromToken } from "@/shared/utils/auth";
-import type { Role } from "@/features/auth/types/auth.types";
+import type { Role } from "@/features/layout/constants/role";
 
 interface Props {
   allowed: Role[];
@@ -14,7 +14,9 @@ export function RoleGuard({ allowed, children }: Props) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowed.includes(user.role as Role)) {
+  const userRole = user.role as Role;
+
+  if (!allowed.includes(userRole)) {
     return <Navigate to="/access-denied" replace />;
   }
 

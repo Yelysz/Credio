@@ -21,8 +21,6 @@ interface SidebarProps {
     name: string;
     role: Role;
   };
-  activeNav?: string;
-  onNav?: (id: string) => void;
   collapsed: boolean;
   onToggle: () => void;
   rolesConfig: RolesConfig;
@@ -30,13 +28,11 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   user,
-  activeNav,
-  onNav,
   collapsed,
   onToggle,
   rolesConfig,
 }) => {
-  const cfg = rolesConfig[user.role];
+  const cfg = rolesConfig[user.role] ?? rolesConfig.Client;
 
   const initials = user.name
     .split(" ")
@@ -105,33 +101,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <NavLink
             key={item.id}
             to={item.path}
+            end={item.path === "/"}
             title={collapsed ? item.label : ""}
-            onClick={() => onNav?.(item.id)}
-            style={({ isActive }) => {
-              const active = isActive || item.id === activeNav;
-
-              return {
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: collapsed ? "12px 0" : "9px 12px",
-                justifyContent: collapsed ? "center" : "flex-start",
-                borderRadius: collapsed ? 0 : 9,
-                background: active ? cfg.light : "transparent",
-                color: active ? cfg.accent : T.gray600,
-                cursor: "pointer",
-                fontSize: 13.5,
-                fontWeight: active ? 600 : 400,
-                marginBottom: 2,
-                borderLeft:
-                  active && !collapsed
-                    ? `3px solid ${cfg.accent}`
-                    : "3px solid transparent",
-                textDecoration: "none",
-                boxSizing: "border-box",
-              };
-            }}
+            style={({ isActive }) => ({
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: collapsed ? "12px 0" : "9px 12px",
+              justifyContent: collapsed ? "center" : "flex-start",
+              borderRadius: collapsed ? 0 : 9,
+              background: isActive ? cfg.light : "transparent",
+              color: isActive ? cfg.accent : T.gray600,
+              cursor: "pointer",
+              fontSize: 13.5,
+              fontWeight: isActive ? 600 : 400,
+              marginBottom: 2,
+              borderLeft:
+                isActive && !collapsed
+                  ? `3px solid ${cfg.accent}`
+                  : "3px solid transparent",
+              textDecoration: "none",
+              boxSizing: "border-box",
+            })}
           >
             <span style={{ fontSize: 15, flexShrink: 0 }}>{item.icon}</span>
             {!collapsed && item.label}
