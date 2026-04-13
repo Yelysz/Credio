@@ -11,14 +11,16 @@ export default function LoanApplicationsPage() {
   const filteredApplications = useMemo(() => {
     if (!searchInput.trim()) return applications;
 
-    const q = searchInput.toLowerCase();
+    const q = searchInput.toLowerCase().trim();
 
     return applications.filter((application) => {
       return (
         (application.clientName ?? "").toLowerCase().includes(q) ||
-        (application.employeeName ?? "").toLowerCase().includes(q) ||
-        (application.applicationStatus ?? "").toLowerCase().includes(q) ||
-        String(application.requestedAmount ?? "").includes(q)
+        (application.employeeId ?? "").toLowerCase().includes(q) ||
+        (application.applicationStatusName ?? "").toLowerCase().includes(q) ||
+        String(application.requestedAmount ?? "").includes(q) ||
+        (application.applicationCode ?? "").toLowerCase().includes(q) ||
+        (application.paymentFrequency ?? "").toLowerCase().includes(q)
       );
     });
   }, [applications, searchInput]);
@@ -33,12 +35,16 @@ export default function LoanApplicationsPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => navigate("/loan-applications/simulate")}
-          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white"
-        >
-          Simular préstamo
-        </button>
+<div className="flex gap-3">
+  <button onClick={() => navigate("/loan-applications/create")} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">
+    Nueva solicitud
+  </button>
+
+  <button onClick={() => navigate("/loan-applications/simulate")} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white">
+    Simular préstamo
+  </button>
+</div>
+      
       </div>
 
       <div className="rounded-2xl border bg-white p-4">
@@ -58,11 +64,16 @@ export default function LoanApplicationsPage() {
           </button>
         </div>
 
-        {isLoading && <p className="text-sm text-slate-500">Cargando solicitudes...</p>}
+        {isLoading && (
+          <p className="text-sm text-slate-500">Cargando solicitudes...</p>
+        )}
+
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         {!isLoading && !error && filteredApplications.length === 0 && (
-          <p className="text-sm text-slate-500">No hay solicitudes registradas.</p>
+          <p className="text-sm text-slate-500">
+            No hay solicitudes registradas.
+          </p>
         )}
 
         {!isLoading && !error && filteredApplications.length > 0 && (
@@ -75,32 +86,47 @@ export default function LoanApplicationsPage() {
                   <th className="border-b px-4 py-3">Monto solicitado</th>
                   <th className="border-b px-4 py-3">Plazo</th>
                   <th className="border-b px-4 py-3">Estado</th>
-                  <th className="border-b px-4 py-3">Fecha</th>
+                  <th className="border-b px-4 py-3">Frecuencia</th>
                   <th className="border-b px-4 py-3">Acciones</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredApplications.map((application) => (
                   <tr key={application.id} className="text-sm">
-                    <td className="border-b px-4 py-3">{application.clientName ?? "—"}</td>
-                    <td className="border-b px-4 py-3">{application.employeeName ?? "—"}</td>
+                    <td className="border-b px-4 py-3">
+                      {application.clientName ?? "—"}
+                    </td>
+
+                    <td className="border-b px-4 py-3">
+                      {application.employeeId ?? "—"}
+                    </td>
+
                     <td className="border-b px-4 py-3">
                       {typeof application.requestedAmount === "number"
                         ? application.requestedAmount.toLocaleString("es-DO")
-                        : application.requestedAmount ?? "—"}
-                    </td>
-                    <td className="border-b px-4 py-3">
-                      {application.termMonths ? `${application.termMonths} meses` : "—"}
-                    </td>
-                    <td className="border-b px-4 py-3">{application.applicationStatus ?? "—"}</td>
-                    <td className="border-b px-4 py-3">
-                      {application.createdAt
-                        ? new Date(application.createdAt).toLocaleDateString("es-DO")
                         : "—"}
                     </td>
+
+                    <td className="border-b px-4 py-3">
+                      {typeof application.requestTerm === "number"
+                        ? `${application.requestTerm} meses`
+                        : "—"}
+                    </td>
+
+                    <td className="border-b px-4 py-3">
+                      {application.applicationStatusName ?? "—"}
+                    </td>
+
+                    <td className="border-b px-4 py-3">
+                      {application.paymentFrequency ?? "—"}
+                    </td>
+
                     <td className="border-b px-4 py-3">
                       <button
-                        onClick={() => navigate(`/loan-applications/${application.id}`)}
+                        onClick={() =>
+                          navigate(`/loan-applications/${application.id}`)
+                        }
                         className="rounded-lg border px-3 py-1 text-xs"
                       >
                         Ver detalle

@@ -4,14 +4,28 @@ import type {
   UpdateSystemSettingPayload,
 } from "../types/settings.types";
 
+interface ApiResponse<T> {
+  detail: string;
+  type: string;
+  statusCode: number;
+  data: T;
+}
+
 export const settingsService = {
   async getAll() {
-    const { data } = await lendingApi.get<SystemSetting[]>("/api/v1/settings/all");
-    return data;
+    const response = await lendingApi.get<ApiResponse<SystemSetting[]>>(
+      "/api/v1/settings/all"
+    );
+
+    return response.data.data;
   },
 
   async update(payload: UpdateSystemSettingPayload) {
-    const { data } = await lendingApi.put("/api/v1/settings", payload);
-    return data;
+    const response = await lendingApi.put<ApiResponse<SystemSetting>>(
+      "/api/v1/settings",
+      payload
+    );
+
+    return response.data.data;
   },
 };

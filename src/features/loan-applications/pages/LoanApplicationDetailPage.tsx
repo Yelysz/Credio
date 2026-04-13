@@ -45,42 +45,68 @@ export default function LoanApplicationDetailPage() {
       <div className="rounded-2xl border bg-white p-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Info label="Cliente" value={application.clientName} />
-          <Info label="Documento" value={application.documentNumber} />
-          <Info label="Oficial" value={application.employeeName} />
-          <Info label="Estado" value={application.applicationStatus} />
+          <Info label="Documento" value={application.documentNumber ?? "—"} />
+          <Info label="Oficial" value={application.employeeId ?? "—"} />
+          <Info label="Estado" value={application.applicationStatusName} />
+
           <Info
             label="Monto solicitado"
             value={
               typeof application.requestedAmount === "number"
                 ? application.requestedAmount.toLocaleString("es-DO")
-                : String(application.requestedAmount ?? "—")
+                : "—"
             }
           />
+
           <Info
             label="Monto aprobado"
             value={
               typeof application.approvedAmount === "number"
                 ? application.approvedAmount.toLocaleString("es-DO")
-                : String(application.approvedAmount ?? "—")
+                : "—"
             }
           />
+
           <Info
-            label="Tasa de interés"
+            label="Tasa de interés solicitada"
             value={
-              typeof application.interestRate === "number"
-                ? `${application.interestRate}%`
-                : String(application.interestRate ?? "—")
+              typeof application.requestedInterestRate === "number"
+                ? `${application.requestedInterestRate}%`
+                : "—"
             }
           />
+
           <Info
-            label="Plazo"
+            label="Tasa de interés aprobada"
             value={
-              application.termMonths ? `${application.termMonths} meses` : "—"
+              typeof application.approvedInterestRate === "number"
+                ? `${application.approvedInterestRate}%`
+                : "—"
             }
           />
-          <Info label="Frecuencia de pago" value={application.paymentFrequency} />
-          <Info label="Notas" value={application.notes} />
-          <Info label="Motivo de rechazo" value={application.rejectionReason} />
+
+          <Info
+            label="Plazo solicitado"
+            value={
+              typeof application.requestTerm === "number"
+                ? `${application.requestTerm} meses`
+                : "—"
+            }
+          />
+
+          <Info
+            label="Plazo aprobado"
+            value={
+              typeof application.approvedTerm === "number"
+                ? `${application.approvedTerm} meses`
+                : "—"
+            }
+          />
+
+          <Info label="Frecuencia de pago" value={application.paymentFrequency ?? "—"} />
+          <Info label="Propósito" value={application.purpose || "—"} />
+          <Info label="Motivo de rechazo" value={application.rejectionReason || "—"} />
+          <Info label="Código de solicitud" value={application.applicationCode ?? "—"} />
         </div>
       </div>
     </div>

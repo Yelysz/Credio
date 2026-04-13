@@ -6,6 +6,13 @@ import type {
   RegisterEmployeePayload,
 } from "../types/employee.types";
 
+interface ApiResponse<T> {
+  detail: string;
+  type: string;
+  statusCode: number;
+  data: T;
+}
+
 const buildFormData = (payload: RegisterEmployeePayload) => {
   const formData = new FormData();
 
@@ -24,33 +31,43 @@ const buildFormData = (payload: RegisterEmployeePayload) => {
 
 export const employeeService = {
   async getAll(params?: GetEmployeesParams) {
-    const { data } = await lendingApi.get<Employee[]>("/api/v1/employee/all", {
-      params,
-    });
-    return data;
+    const response = await lendingApi.get<ApiResponse<Employee[]>>(
+      "/api/v1/employee/all",
+      { params }
+    );
+
+    return response.data.data;
   },
 
   async getById(id: string) {
-    const { data } = await lendingApi.get<EmployeeDetail>(`/api/v1/employee/by-id/${id}`);
-    return data;
+    const response = await lendingApi.get<ApiResponse<EmployeeDetail>>(
+      `/api/v1/employee/by-id/${id}`
+    );
+
+    return response.data.data;
   },
 
   async getByCode(employeeCode: string) {
-    const { data } = await lendingApi.get<EmployeeDetail>(
+    const response = await lendingApi.get<ApiResponse<EmployeeDetail>>(
       `/api/v1/employee/by-code/${employeeCode}`
     );
-    return data;
+
+    return response.data.data;
   },
 
   async register(payload: RegisterEmployeePayload) {
     const formData = buildFormData(payload);
 
-    const { data } = await lendingApi.post("/api/v1/employee/register", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await lendingApi.post<ApiResponse<unknown>>(
+      "/api/v1/employee/register",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-    return data;
+    return response.data.data;
   },
 };

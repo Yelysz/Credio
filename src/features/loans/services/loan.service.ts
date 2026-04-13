@@ -7,30 +7,68 @@ import type {
   LoanScheduleResponse,
   PreviewAmortizationParams,
 } from "../types/loan.types";
+import type {
+  CreateLoanApplicationPayload,
+  LoanApplication,
+} from "../../loan-applications/types/loanApplication.types";
+
+type ApiEnvelope<T> = {
+  detail?: string;
+  type?: string;
+  statusCode?: number;
+  data?: T;
+};
+
+const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "data" in payload
+  ) {
+    return (payload as ApiEnvelope<T>).data as T;
+  }
+
+  return payload as T;
+};
 
 export const loanService = {
   async previewAmortization(params: PreviewAmortizationParams) {
-    const { data } = await lendingApi.get<Installment[]>(
+    const response = await lendingApi.get<ApiEnvelope<Installment[]> | Installment[]>(
       "/api/v1/loan/preview-amortization",
       { params }
     );
-    return data;
+
+    return unwrap<Installment[]>(response.data);
+  },
+
+  async createLoanApplication(payload: CreateLoanApplicationPayload) {
+    const response = await lendingApi.post<ApiEnvelope<LoanApplication> | LoanApplication>(
+      "/api/v1/loan-application/create",
+      payload
+    );
+
+    return unwrap<LoanApplication>(response.data);
   },
 
   async createLoan(payload: CreateLoanPayload) {
-    const { data } = await lendingApi.post<Loan>("/api/v1/loan/create", payload);
-    return data;
+    const response = await lendingApi.post<ApiEnvelope<Loan> | Loan>(
+      "/api/v1/loan/create",
+      payload
+    );
+
+    return unwrap<Loan>(response.data);
   },
 
   async disburseLoan(payload: DisburseLoanPayload) {
-    const { data } = await lendingApi.post("/api/v1/loan/disburse", payload);
-    return data;
+    const response = await lendingApi.post("/api/v1/loan/disburse", payload);
+    return unwrap(response.data);
   },
 
   async getSchedule(loanId: string) {
-    const { data } = await lendingApi.get<LoanScheduleResponse>(
-      `/api/v1/loan/${loanId}/schedule`
-    );
-    return data;
+    const response = await lendingApi.get<
+      ApiEnvelope<LoanScheduleResponse> | LoanScheduleResponse
+    >(`/api/v1/loan/${loanId}/schedule`);
+
+    return unwrap<LoanScheduleResponse>(response.data);
   },
 };

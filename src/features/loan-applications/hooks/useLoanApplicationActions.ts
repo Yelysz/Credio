@@ -1,11 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
-import { loanService } from "../services/loan.service";
+import { loanService } from "../../loans/services/loan.service";
 import type {
   CreateLoanPayload,
   DisburseLoanPayload,
   Loan,
-} from "../types/loan.types";
+} from "../../loans/types/loan.types";
 import type {
   CreateLoanApplicationPayload,
   LoanApplication,

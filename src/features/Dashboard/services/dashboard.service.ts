@@ -5,25 +5,32 @@ import type {
 import { mapDashboardMetrics } from "../utils/dashboard.mappers";
 import { lendingApi } from "@/shared/services/api";
 
+type ApiResponse<T> = {
+  detail: string;
+  type: string;
+  statusCode: number;
+  data: T;
+};
+
 export const dashboardService = {
   async getMetrics(params?: Record<string, string | number | boolean>) {
-    const { data } = await lendingApi.get<DashboardMetricsApiResponse>(
+    const response = await lendingApi.get<ApiResponse<DashboardMetricsApiResponse>>(
       "/api/v1/dashboard/metrics",
       { params }
     );
 
-    return data;
+    return response.data.data;
   },
 
   async getUpcomingInstallments(
     params?: Record<string, string | number | boolean>
   ) {
-    const { data } = await lendingApi.get<UpcomingInstallment[]>(
+    const response = await lendingApi.get<ApiResponse<UpcomingInstallment[]>>(
       "/api/v1/dashboard/upcoming-installments",
       { params }
     );
 
-    return data;
+    return response.data.data;
   },
 
   async getDashboardData(params?: Record<string, string | number | boolean>) {

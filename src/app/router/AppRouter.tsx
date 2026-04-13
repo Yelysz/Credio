@@ -24,6 +24,7 @@ import LoanSchedulePage from "@/features/loans/pages/LoanSchedulePage";
 
 import PortfolioReportPage from "@/features/reports/pages/PortfolioReportPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
+import LoanApplicationCreatePage from "@/features/loan-applications/pages/LoanApplicationCreatePage";
 
 function AccessDeniedPage() {
   return (
@@ -139,6 +140,8 @@ export function AppRouter() {
         path="/settings"
         element={allow(["Administrator"], <SettingsPage />)}
       />
+
+      <Route path="/loan-applications/create" element={<LoanApplicationCreatePage />} />
 
       <Route path="/access-denied" element={<AccessDeniedPage />} />
       <Route path="*" element={<NotFoundPage />} />

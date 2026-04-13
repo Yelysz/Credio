@@ -41,8 +41,6 @@ export const authApi = axios.create({
 export const lendingApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL_LENDING,
   withCredentials: true,
-  headers: {
-    "Content-Type": "multipart/form-data"},
 });
 
 attachAuthInterceptor(authApi);

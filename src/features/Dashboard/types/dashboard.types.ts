@@ -1,33 +1,55 @@
-export interface DashboardMetricsApiResponse {
-  carteraTotal?: number | string;
-  liquidezDisponible?: number | string;
-  moraTotal?: number | string;
-  prestamosActivos?: number | string;
+export type DashboardMetricsApiResponse = {
+  totalPortfolio: number;
+  availableLiquidity: number;
+  totalDelinquency: number;
+  activeLoans: number;
 
-  totalPortfolio?: number | string;
-  availableLiquidity?: number | string;
-  totalDelinquency?: number | string;
-  activeLoans?: number | string;
+  cashFlow: {
+    disbursements: number[];
+    collections: number[];
+  };
 
-  [key: string]: unknown;
-}
+  portfolioState: {
+    currentPercentage: number;
+    overduePercentage: number;
+    dueSoonPercentage: number;
+  };
+};
 
-export interface UpcomingInstallment {
-  id?: string;
-  loanId?: string;
-  loanNumber?: string;
-  clientName?: string;
-  dueDate?: string;
-  amount?: number | string;
-  installmentNumber?: number;
-  status?: string;
-  [key: string]: unknown;
-}
+export type UpcomingInstallment = {
+  client: string;
+  loan: number;
+  dueAmount: number;
+  dueDate: string;
+  state: string;
+};
 
-export interface DashboardViewModel {
-  carteraTotal: number;
-  liquidezDisponible: number;
-  moraTotal: number;
-  prestamosActivos: number;
-  upcomingInstallments: UpcomingInstallment[];
-}
+export type DashboardUpcomingInstallment = {
+  client: string;
+  loan: number | string;
+  installment: string;
+  dueDate: string;
+  amount: number;
+  status: string;
+};
+
+export type DashboardData = {
+  totalPortfolio: number;
+  availableLiquidity: number;
+  totalDelinquency: number;
+  activeLoans: number;
+
+  upcomingInstallments: DashboardUpcomingInstallment[];
+
+  // nuevos campos
+  cashFlow: {
+    disbursements: number[];
+    collections: number[];
+  };
+
+  portfolioState: {
+    currentPercentage: number;
+    overduePercentage: number;
+    dueSoonPercentage: number;
+  };
+};

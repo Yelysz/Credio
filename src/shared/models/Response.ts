@@ -4,3 +4,7 @@ export interface ApiResponse<T> {
   statusCode: number;
   data: T;
 }
+
+export const unwrapApiResponse = <T>(response: ApiResponse<T>): T => {
+  return response.data;
+};

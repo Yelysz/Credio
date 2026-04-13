@@ -59,33 +59,36 @@ export default function DashboardPage() {
 
       <div style={cardsGridStyle}>
         <StatCard
-          label="Cartera Total"
-          val={formatCurrency(data.carteraTotal)}
-          sub="Resumen general de cartera"
-          color="#2F6B2F"
-          icon="💰"
-        />
-        <StatCard
-          label="Liquidez Disponible"
-          val={formatCurrency(data.liquidezDisponible)}
-          sub="Disponible para desembolsos"
-          color="#059669"
-          icon="📈"
-        />
-        <StatCard
-          label="Mora Total"
-          val={formatCurrency(data.moraTotal)}
-          sub="Monto total en mora"
-          color={T.red}
-          icon="⚠️"
-        />
-        <StatCard
-          label="Préstamos Activos"
-          val={String(data.prestamosActivos)}
-          sub="Cantidad actual de préstamos"
-          color="#7C3AED"
-          icon="👥"
-        />
+  label="Cartera Total"
+  val={formatCurrency(Number(data.totalPortfolio ?? 0))}
+  sub="Resumen general de cartera"
+  color="#2F6B2F"
+  icon="💰"
+/>
+
+<StatCard
+  label="Liquidez Disponible"
+  val={formatCurrency(Number(data.availableLiquidity ?? 0))}
+  sub="Disponible para desembolsos"
+  color="#059669"
+  icon="📈"
+/>
+
+<StatCard
+  label="Mora Total"
+  val={formatCurrency(Number(data.totalDelinquency ?? 0))}
+  sub="Monto total en mora"
+  color="#DC2626"
+  icon="⚠️"
+/>
+
+<StatCard
+  label="Préstamos Activos"
+  val={String(data.activeLoans ?? 0)}
+  sub="Cantidad actual de préstamos"
+  color="#7C3AED"
+  icon="👥"
+/>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
@@ -110,24 +113,28 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.upcomingInstallments.map((item, index) => (
-                    <tr key={item.id ?? `${item.loanId ?? "loan"}-${index}`}>
-                      <td style={tdStyle}>{item.clientName ?? "—"}</td>
-                      <td style={tdStyle}>
-                        {item.loanNumber ?? item.loanId ?? "—"}
-                      </td>
-                      <td style={tdStyle}>
-                        {item.installmentNumber ?? "—"}
-                      </td>
-                      <td style={tdStyle}>{formatDate(item.dueDate)}</td>
-                      <td style={tdStyle}>
-                        {typeof item.amount !== "undefined"
-                          ? formatCurrency(Number(item.amount))
-                          : "—"}
-                      </td>
-                      <td style={tdStyle}>{item.status ?? "Pendiente"}</td>
-                    </tr>
-                  ))}
+                  {data.upcomingInstallments.map(
+  (
+    item: {
+      client: string;
+      loan: number | string;
+      installment: string;
+      dueDate: string;
+      amount: number;
+      status: string;
+    },
+    index: number
+  ) => (
+    <tr key={`${item.loan}-${index}`}>
+      <td style={tdStyle}>{item.client}</td>
+      <td style={tdStyle}>{item.loan}</td>
+      <td style={tdStyle}>{item.installment}</td>
+      <td style={tdStyle}>{formatDate(item.dueDate)}</td>
+      <td style={tdStyle}>{formatCurrency(item.amount)}</td>
+      <td style={tdStyle}>{item.status}</td>
+    </tr>
+  )
+)}
                 </tbody>
               </table>
             </div>

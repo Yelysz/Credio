@@ -1,23 +1,32 @@
 export interface LoanApplication {
   id: string;
+  applicationCode?: string;
   clientId?: string;
   clientName?: string;
   employeeId?: string;
-  employeeName?: string;
+
   requestedAmount?: number;
-  approvedAmount?: number;
-  interestRate?: number;
-  termMonths?: number;
-  paymentFrequency?: string;
-  applicationStatus?: string;
+  requestedTerm?: number;
+  requestedInterestRate?: number;
+  purpose?: string;
+
+  approvedAmount?: number | null;
+  approvedTerm?: number | null;
+  approvedInterestRate?: number | null;
+
+  applicationStatusId?: string;
+  applicationStatusName?: string;
+
+  rejectionReason?: string;
+  paymentFrequencyId?: string;
+  paymentFrequency?: string | null;
+
   createdAt?: string;
   [key: string]: unknown;
 }
 
 export interface LoanApplicationDetail extends LoanApplication {
   documentNumber?: string;
-  notes?: string;
-  rejectionReason?: string;
 }
 
 export interface LoanApplicationListParams {
@@ -50,4 +59,14 @@ export interface SimulationResponse {
   totalInterest?: number;
   totalPayment?: number;
   [key: string]: unknown;
+}
+
+export interface CreateLoanApplicationPayload {
+  requestedInterestRate: number;
+  requestedAmount: number;
+  requestedTerm: number;
+  clientId: string;
+  employeeId: string;
+  paymentFrequencyId: string;
+  purpose?: string;
 }
