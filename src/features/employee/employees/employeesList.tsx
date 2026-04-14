@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CirclePlus, Search, Trash2, FilePenLine, Eye } from "lucide-react";
+import { CirclePlus, Search, Trash2, FilePenLine, Eye, Loader2, Edit } from "lucide-react";
 import { Button, Modal } from "@/shared/components";
 import type { Employee } from "@/shared/models/Employee";
 import {
@@ -7,6 +7,7 @@ import {
   createEmployee,
   type CreateEmployeePayload,
 } from "@/shared/services/employees";
+import toast from "react-hot-toast";
 
 type EmployeeWithFilters = Employee & {
   status?: string;
@@ -148,6 +149,7 @@ export function Employees() {
     try {
       setSaving(true);
       await createEmployee(form);
+      toast.success("Empleado registrado correctamente");
 
       closeModal();
 
@@ -158,7 +160,7 @@ export function Employees() {
       }
     } catch (error) {
       console.error("Error creando empleado:", error);
-      alert("No se pudo guardar el empleado.");
+      toast.error("Error al guardar el empleado");
     } finally {
       setSaving(false);
     }
@@ -239,8 +241,11 @@ export function Employees() {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="p-6 text-sm text-gray-500">
-              Cargando empleados...
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+                <span className="text-sm font-medium text-gray-600">Cargando clientes...</span>
+              </div>
             </div>
           ) : empleadosFiltrados.length === 0 ? (
             <div className="p-6 text-sm text-gray-500">
@@ -266,15 +271,6 @@ export function Employees() {
                     Correo Electrónico
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                    Dirección
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                    Ciudad
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                    Sector
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                     Acciones
                   </th>
                 </tr>
@@ -284,12 +280,12 @@ export function Employees() {
                 {empleadosFiltrados.map((employee) => {
                   const direccion = employee.address
                     ? [
-                        employee.address.streetNumber,
-                        employee.address.addressLine1,
-                        employee.address.addressLine2,
-                      ]
-                        .filter(Boolean)
-                        .join(" ")
+                      employee.address.streetNumber,
+                      employee.address.addressLine1,
+                      employee.address.addressLine2,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")
                     : "-";
 
                   return (
@@ -309,37 +305,28 @@ export function Employees() {
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {employee.email}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {direccion}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {employee.address?.city ?? "-"}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {employee.address?.region ?? "-"}
-                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            className="rounded-md p-2 text-amber-600 hover:bg-amber-50"
+
+                          <button className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                            title="Ver"
                           >
-                            <FilePenLine className="h-5 w-5" />
+                            <Eye className="w-6 h-6" />
                           </button>
 
-                          <button
-                            type="button"
-                            className="rounded-md p-2 text-sky-600 hover:bg-sky-50"
+                          <button className="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                            title="Editar"
                           >
-                            <Eye className="h-5 w-5" />
+                            <Edit className="w-5 h-5" />
                           </button>
-
                           <button
                             type="button"
-                            className="rounded-md p-2 text-red-600 hover:bg-red-50"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                            title="Eliminar"
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
+
                         </div>
                       </td>
                     </tr>
@@ -447,7 +434,7 @@ export function Employees() {
             >
               <option value="">Seleccione</option>
               <option value="CEDULA">Cédula</option>
-  <option value="Pasaporte">Pasaporte</option>
+              <option value="Pasaporte">Pasaporte</option>
             </select>
           </div>
 

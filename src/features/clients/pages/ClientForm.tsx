@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
 import type { Client } from '@/shared/models/Client';
-import { createClient } from '../services/clients.service';
+import { createClient, updateClient } from '../services/clients.service';
+import toast from 'react-hot-toast';
 
 
 export const ClientForm = ({
   client,
   onCancelar,
+  onSuccess,
   modoEdicion
 }: {
   client: Client | null;
   onCancelar: () => void;
+  onSuccess: () => void;
   modoEdicion: boolean;
 }) => {
 
@@ -28,12 +31,12 @@ export const ClientForm = ({
     image: null as File | null,
 
     addressDto: {
-      streetNumber: client?.addressDto?.streetNumber || '',
-      addressLine1: client?.addressDto?.addressLine1 || '',
-      addressLine2: client?.addressDto?.addressLine2 || '',
-      city: client?.addressDto?.city || '',
-      region: client?.addressDto?.region || '',
-      postalCode: client?.addressDto?.postalCode || '',
+      streetNumber: client?.address?.streetNumber || '',
+      addressLine1: client?.address?.addressLine1 || '',
+      addressLine2: client?.address?.addressLine2 || '',
+      city: client?.address?.city || '',
+      region: client?.address?.region || '',
+      postalCode: client?.address?.postalCode || '',
     }
   });
 
@@ -48,37 +51,52 @@ export const ClientForm = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const payload = new FormData();
+    const loadingToastId = toast.loading(modoEdicion ? "Actualizando cliente..." : "Registrando cliente...");
+    try {
 
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key !== "addressDto" && key !== "image") {
-        payload.append(key, String(value));
+      if (modoEdicion) {
+        const jsonPayload = {
+          ...formData,
+          address: { ...formData.addressDto }
+        };
+        delete (jsonPayload as any).image;
+        delete (jsonPayload as any).addressDto; // Ajuste según tu interfaz
+
+        const result = await updateClient(jsonPayload, client!.id);
+        console.log("Cliente actualizado:", result);
       }
-    });
+      else {
+        const payload = new FormData();
 
-    Object.entries(formData.addressDto).forEach(([key, value]) => {
-      payload.append(`addressDto.${key}`, value);
-    });
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key !== "addressDto" && key !== "image") {
+            payload.append(key, String(value));
+          }
+        });
 
-    if (formData.image) {
-      payload.append("image", formData.image);
+        Object.entries(formData.addressDto).forEach(([key, value]) => {
+          payload.append(`addressDto.${key}`, value);
+        });
+
+        if (formData.image) {
+          payload.append("image", formData.image);
+        }
+
+        const result = await createClient(payload);
+
+        console.log("Cliente creado:", result);
+      }
+
+      toast.success(modoEdicion ? "Cliente actualizado" : "Cliente creado", { id: loadingToastId });
+      onSuccess();
+
+    } catch (error) {
+      console.error("Error al crear cliente:", error);
+      toast.error("Error al registrar cliente", { id: loadingToastId });
     }
-
-    const result = await createClient(payload);
-
-    console.log("Cliente creado:", result);
-
-    alert("Cliente registrado correctamente");
-    onCancelar();
-
-  } catch (error) {
-    console.error("Error al crear cliente:", error);
-    alert("Error al registrar cliente");
-  }
-};
+  };
 
   return (
     <div className="p-4 lg:p-6 space-y-6">
@@ -128,8 +146,8 @@ export const ClientForm = ({
               required
             >
               <option value="">Tipo Documento</option>
-              <option value="Cedula">Cédula</option>
-              <option value="Pasaporte">Pasaporte</option>
+              <option value="CEDULA">Cédula</option>
+              <option value="PASAPORTE">Pasaporte</option>
             </select>
 
             <input
