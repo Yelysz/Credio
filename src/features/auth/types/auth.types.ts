@@ -1,6 +1,5 @@
 // auth.types.ts
 export const Roles = {
-  SuperAdmin: "SuperAdmin",
   Administrator: "Administrator",
   Client: "Client",
   Collector: "Collector",

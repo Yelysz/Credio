@@ -13,9 +13,6 @@ import ClientsPage from "@/features/clients/pages/ClientsPage";
 import ClientFormPage from "@/features/clients/pages/ClientFormPage";
 import ClientDetailPage from "@/features/clients/pages/ClientDetailPage";
 
-import LoanApplicationsPage from "@/features/loan-applications/pages/LoanApplicationsPage";
-import LoanApplicationDetailPage from "@/features/loan-applications/pages/LoanApplicationDetailPage";
-import LoanApplicationSimulationPage from "@/features/loan-applications/pages/LoanApplicationSimulationPage";
 
 import LoanPreviewPage from "@/features/loans/pages/LoanPreviewPage";
 import LoanCreatePage from "@/features/loans/pages/LoanCreatePage";
@@ -24,7 +21,9 @@ import LoanSchedulePage from "@/features/loans/pages/LoanSchedulePage";
 
 import PortfolioReportPage from "@/features/reports/pages/PortfolioReportPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
-import LoanApplicationCreatePage from "@/features/loan-applications/pages/LoanApplicationCreatePage";
+
+import NewLoanApplicationPage from "@/features/loan-applications/pages/NewLoanApplicationPage";
+
 
 function AccessDeniedPage() {
   return (
@@ -102,19 +101,6 @@ export function AppRouter() {
       />
 
       <Route
-        path="/loan-applications"
-        element={allow(["Administrator", "Officer"], <LoanApplicationsPage />)}
-      />
-      <Route
-        path="/loan-applications/:id"
-        element={allow(["Administrator", "Officer"], <LoanApplicationDetailPage />)}
-      />
-      <Route
-        path="/loan-applications/simulate"
-        element={allow(["Administrator", "Officer"], <LoanApplicationSimulationPage />)}
-      />
-
-      <Route
         path="/loans/preview"
         element={allow(["Administrator", "Officer"], <LoanPreviewPage />)}
       />
@@ -141,7 +127,12 @@ export function AppRouter() {
         element={allow(["Administrator"], <SettingsPage />)}
       />
 
-      <Route path="/loan-applications/create" element={<LoanApplicationCreatePage />} />
+        <Route
+        path="/loan-applications"
+        element={<NewLoanApplicationPage />}
+      />
+
+
 
       <Route path="/access-denied" element={<AccessDeniedPage />} />
       <Route path="*" element={<NotFoundPage />} />

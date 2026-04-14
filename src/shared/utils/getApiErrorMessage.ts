@@ -1,30 +1,40 @@
 import axios from "axios";
 
 type ApiErrorResponse = {
-  status?: string;
-  details?: Array<{
-    code?: string;
-    message?: string;
-  }>;
+  detail?: string;
   message?: string;
+  errors?: Array<{
+    errorCode?: string;
+    description?: string;
+    type?: number;
+  }>;
 };
 
-export const getApiErrorMessage = (
+export const getApiErrorMessages = (
   error: unknown,
   fallback = "Ocurrió un error"
-) => {
+): string[] => {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
-    return (
-      error.response?.data?.details?.[0]?.message ||
-      error.response?.data?.message ||
-      error.message ||
-      fallback
-    );
+    const data = error.response?.data;
+
+    if (data?.errors && Array.isArray(data.errors)) {
+      const messages = data.errors
+        .map((item) => item.description?.trim())
+        .filter((msg): msg is string => Boolean(msg));
+
+      if (messages.length > 0) {
+        return messages;
+      }
+    }
+
+    if (data?.detail) return [data.detail];
+    if (data?.message) return [data.message];
+    if (error.message) return [error.message];
   }
 
   if (error instanceof Error) {
-    return error.message;
+    return [error.message];
   }
 
-  return fallback;
+  return [fallback];
 };

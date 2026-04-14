@@ -2,7 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { authService } from "../services/auth.service";
 import { Button, Input } from "@/shared/components";
-import { getApiErrorMessage } from "@/shared/utils/getApiErrorMessage";
+import { getApiErrorMessages } from "@/shared/utils/getApiErrorMessage";
 
 interface Props {
   open: boolean;
@@ -29,7 +29,7 @@ export function ForgotPasswordModal({ open, onClose }: Props) {
       toast.success("Código enviado correctamente");
       setStep("confirm");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "No se pudo enviar el código"));
+      toast.error(getApiErrorMessages(error, "No se pudo enviar el código")[0]);
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export function ForgotPasswordModal({ open, onClose }: Props) {
       toast.success("Código confirmado");
       setStep("change");
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Código inválido"));
+      toast.error(getApiErrorMessages(error, "Código inválido")[0]);
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,9 @@ export function ForgotPasswordModal({ open, onClose }: Props) {
       toast.success("Contraseña actualizada");
       handleClose();
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "No se pudo cambiar la contraseña"));
+      toast.error(
+        getApiErrorMessages(error, "No se pudo cambiar la contraseña")[0]
+      );
     } finally {
       setLoading(false);
     }

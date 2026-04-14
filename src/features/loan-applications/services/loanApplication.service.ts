@@ -1,40 +1,79 @@
 import { lendingApi } from "@/shared/services/api";
-import type { ApiResponse } from "@/shared/models/Response";
-import {
-  unwrapApiResponse,
-} from "@/shared/models/Response";
 import type {
-  LoanApplication,
-  LoanApplicationDetail,
-  LoanApplicationListParams,
-  SimulationParams,
-  SimulationResponse,
+  ApiResponse,
+  ClientItem,
+  CreateLoanApplicationPayload,
+  PaymentFrequency,
+  SimulateLoanApplicationParams,
+  SimulationResult,
 } from "../types/loanApplication.types";
 
+const unwrapResponse = <T>(responseData: T | ApiResponse<T>): T => {
+  if (
+    responseData &&
+    typeof responseData === "object" &&
+    "data" in responseData
+  ) {
+    return (responseData as ApiResponse<T>).data;
+  }
+
+  return responseData as T;
+};
+
 export const loanApplicationService = {
-  async getAll(params?: LoanApplicationListParams) {
-    const { data } = await lendingApi.get<ApiResponse<LoanApplication[]>>(
-      "/api/v1/loan-application/all",
+  async getClients(params?: {
+    pageNumber?: number;
+    pageSize?: number;
+    search?: string;
+  }) {
+    const { data } = await lendingApi.get<ApiResponse<ClientItem[]> | ClientItem[]>(
+      "/api/v1/client/all",
       { params }
     );
 
-    return unwrapApiResponse(data) ?? [];
+    return unwrapResponse<ClientItem[]>(data);
   },
 
-  async getById(id: string) {
-    const { data } = await lendingApi.get<ApiResponse<LoanApplicationDetail>>(
-      `/api/v1/loan-application/by-id/${id}`
-    );
+  async getPaymentFrequencies() {
+    const { data } = await lendingApi.get<
+      ApiResponse<PaymentFrequency[]> | PaymentFrequency[]
+    >("/api/v1/catalog/payment-frequencies");
 
-    return unwrapApiResponse(data);
+    return unwrapResponse<PaymentFrequency[]>(data);
   },
 
-  async simulate(params: SimulationParams) {
-    const { data } = await lendingApi.get<ApiResponse<SimulationResponse>>(
-      "/api/v1/loan-application/simulate",
-      { params }
-    );
+  async simulate(params: SimulateLoanApplicationParams) {
+    const finalParams = {
+      amount: params.requestedAmount,
+      term: params.requestTerm,
+      interestRate: params.requestedInterestRate,
+      paymentFrequencyId: params.paymentFrequencyId,
+    };
 
-    return unwrapApiResponse(data);
+    const { data } = await lendingApi.get<
+      ApiResponse<SimulationResult> | SimulationResult
+    >("/api/v1/loan-application/simulate", {
+      params: finalParams,
+    });
+
+    return unwrapResponse<SimulationResult>(data);
   },
+
+async create(payload: CreateLoanApplicationPayload) {
+  const finalPayload = {
+    requestedAmount: payload.requestedAmount,
+    requestedInterestRate: payload.requestedInterestRate,
+    requestedTerm: payload.requestedTerm,
+    clientId: payload.clientId,
+    employeeId: payload.employeeId,
+    paymentFrequencyId: payload.paymentFrequencyId,
+  };
+
+  const { data } = await lendingApi.post(
+    "/api/v1/loan-application/create",
+    finalPayload
+  );
+
+  return unwrapResponse(data);
+},
 };
