@@ -1,4 +1,4 @@
-import { Edit, Mail,MapPin,Phone, } from 'lucide-react';
+import { Edit, Mail, MapPin, Phone, } from 'lucide-react';
 import type { Client } from '@/shared/models/Client';
 import { useEffect, useState } from 'react';
 import { getClientById } from '../services/clients.service';
@@ -7,22 +7,22 @@ export const ClientDetail = ({ clientId, onVolver, onEditar }: { clientId: strin
 
   const [clientt, setClient] = useState<Client | null>(null);
 
-    useEffect(() => {
-          const fetchEClients = async () => {
-              try {
-                  // setLoading(true);
-                  const data = await getClientById(clientId);
-                  setClient(data);
-                  console.log(data)
-              } catch (error) {
-                  console.error("Error obteniendo empleados:", error);
-              } finally {
-                  // setLoading(false);
-              }
-          };
-  
-          fetchEClients();
-      }, []);
+  useEffect(() => {
+    const fetchEClients = async () => {
+      try {
+        // setLoading(true);
+        const data = await getClientById(clientId);
+        setClient(data);
+        console.log(data)
+      } catch (error) {
+        console.error("Error obteniendo empleados:", error);
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    fetchEClients();
+  }, []);
   return (
     <div className="p-4 lg:p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -73,7 +73,10 @@ export const ClientDetail = ({ clientId, onVolver, onEditar }: { clientId: strin
               <label className="text-sm text-gray-600">Dirección</label>
               <p className="font-medium text-gray-900 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-gray-400" />
-                {clientt?.addressDto?.addressLine1}, {clientt?.addressDto?.city}, {clientt?.addressDto?.region}
+                {clientt?.address
+                  ?.addressLine1}, {clientt?.address
+                    ?.city}, {clientt?.address
+                      ?.region}
               </p>
             </div>
           </div>

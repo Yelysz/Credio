@@ -13,7 +13,7 @@ export interface Client {
   imageUrl: string
   createdAt: string
   updatedAt: string
-  addressDto: {
+  address: {
     streetNumber: string
     addressLine1: string
     addressLine2: string

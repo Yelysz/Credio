@@ -35,9 +35,9 @@ export const authApi = axios.create({
 
 export const lendingApi = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL_LENDING,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // headers: {
+  //   "Content-Type": "tiapplicaon/json",
+  // },
 });
 
 attachAuthInterceptor(authApi);
