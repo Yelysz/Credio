@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { employeeService } from "../services/employee.service";
 import type { EmployeeDetail } from "../types/employee.types";
@@ -11,7 +11,11 @@ export default function EmployeeDetailPage() {
 
   useEffect(() => {
     const run = async () => {
-      if (!id) return;
+      if (!id) {
+        setIsLoading(false);
+        setError("No se recibió el id del empleado.");
+        return;
+      }
 
       try {
         setIsLoading(true);
@@ -29,6 +33,36 @@ export default function EmployeeDetailPage() {
     void run();
   }, [id]);
 
+  const fullName = useMemo(() => {
+    if (!employee) return "—";
+
+    const composedName = `${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
+    return employee.name?.trim() || composedName || "—";
+  }, [employee]);
+
+  const formattedAddress = useMemo(() => {
+    if (!employee?.address) return "—";
+
+    if (typeof employee.address === "string") {
+      return employee.address.trim() || "—";
+    }
+
+    if (typeof employee.address === "object") {
+      return [
+        employee.address.streetNumber,
+        employee.address.addressLine1,
+        employee.address.addressLine2,
+        employee.address.city,
+        employee.address.region,
+        employee.address.postalCode,
+      ]
+        .filter(Boolean)
+        .join(", ") || "—";
+    }
+
+    return "—";
+  }, [employee]);
+
   if (isLoading) return <p>Cargando detalle...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
   if (!employee) return <p>No se encontró el empleado.</p>;
@@ -45,20 +79,19 @@ export default function EmployeeDetailPage() {
       <div className="rounded-2xl border bg-white p-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Info label="Código" value={employee.employeeCode} />
-          <Info label="Nombre" value={employee.name ?? `${employee.firstName ?? ""} ${employee.lastName ?? ""}`} />
+          <Info label="Nombre" value={fullName} />
           <Info label="Correo" value={employee.email} />
           <Info label="Teléfono" value={employee.phone} />
           <Info label="Documento" value={employee.documentNumber} />
-          <Info label="Rol" value={employee.role} />
-          <Info label="Estado" value={employee.status} />
-          <Info label="Dirección" value={employee.address} />
+          <Info label="Tipo de documento" value={employee.documentType} />
+          <Info label="Dirección" value={formattedAddress} />
         </div>
       </div>
     </div>
   );
 }
 
-function Info({ label, value }: { label: string; value?: string }) {
+function Info({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>

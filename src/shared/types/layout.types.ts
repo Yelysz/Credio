@@ -1,10 +1,13 @@
+import type { LucideIcon } from "lucide-react";
+
 export type Role = "Administrator" | "Officer" | "Collector" | "Client";
 
 export interface NavItem {
   id: string;
-  icon: string;
-  label: string;
   path: string;
+  label: string;
+  icon: LucideIcon;
+  section?: string;
 }
 
 export interface RoleConfig {
@@ -12,7 +15,7 @@ export interface RoleConfig {
   accent: string;
   light: string;
   badge: string;
-  icon: string;
+  icon: LucideIcon;
   nav: readonly NavItem[];
   greeting: (name: string) => string;
 }

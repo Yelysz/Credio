@@ -1,46 +1,66 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  UserRound,
+  FileText,
+  HandCoins,
+  BarChart3,
+  Settings,
+  BadgeDollarSign,
+  Wallet,
+  ShieldCheck,
+} from "lucide-react";
+
 export const T = {
-  green900: "#1E2D14",
-  green800: "#2C3A20",
-  green700: "#3D5C28",
-  green600: "#4E7A30",
-  green500: "#5B7E3F",
-  green400: "#7AAF52",
-  green100: "#EFF3EB",
-  green50: "#F7FAF4",
-  blue700: "#1D4ED8",
-  blue500: "#2563EB",
-  blue100: "#EFF6FF",
-  orange700: "#C2410C",
-  orange500: "#EA580C",
-  orange100: "#FFF7ED",
-  indigo700: "#4338CA",
-  indigo500: "#4F46E5",
-  indigo100: "#EEF2FF",
-  gray50: "#F9FAFB",
-  gray100: "#F3F4F6",
-  gray200: "#E5E7EB",
-  gray400: "#9CA3AF",
-  gray600: "#4B5563",
-  gray800: "#1F2937",
-  red: "#EF4444",
+  forest900: "#1A3326",
+  forest800: "#22422F",
+  forest700: "#2D5A3D",
+  forest600: "#3A6E4A",
+  forest500: "#4A8A5A",
+  forest300: "#7CB98A",
+  forest100: "#D6EBD8",
+  forest50: "#EFF7F0",
+
+  cream: "#FAF8F5",
+  sand100: "#F0EDE8",
+  sand200: "#DDD9D2",
+  sand400: "#9E9A92",
+  sand600: "#5E5A54",
+  sand800: "#2A2724",
+  sand900: "#1A1814",
+
+  blue700: "#365C91",
+  blue500: "#4C78A8",
+  blue100: "#EAF2FB",
+
+  amber700: "#9A5B18",
+  amber500: "#C9822B",
+  amber100: "#F9EFE2",
+
+  plum700: "#5E4B73",
+  plum500: "#7B6594",
+  plum100: "#F1ECF7",
+
+  red: "#C65A5A",
   white: "#FFFFFF",
 };
 
 export const ROLES = {
   Administrator: {
     label: "Administrador",
-    accent: T.green600,
-    light: T.green100,
-    badge: T.green400,
-    icon: "⚙️",
+    accent: T.forest600,
+    light: T.forest50,
+    badge: T.forest300,
+    icon: ShieldCheck,
     nav: [
-      { id: "dashboard", icon: "▣", label: "Dashboard", path: "/" },
-      { id: "employees", icon: "👥", label: "Gestión de Empleados", path: "/employees" },
-      { id: "clients", icon: "🧑", label: "Gestión de Clientes", path: "/clients" },
-      { id: "loan-applications", icon: "📋", label: "Solicitudes de Préstamo", path: "/loan-applications" },
-      { id: "loans", icon: "💳", label: "Préstamos", path: "/loans/preview" },
-      { id: "reports", icon: "📊", label: "Reportes de Cartera", path: "/reports/portfolio" },
-      { id: "settings", icon: "⚙️", label: "Configuración", path: "/settings" },
+      { id: "dashboard", icon: LayoutDashboard, label: "Panel General", path: "/", section: "Resumen" },
+      { id: "employees", icon: Users, label: "Empleados", path: "/employees", section: "Gestión" },
+      { id: "clients", icon: UserRound, label: "Clientes", path: "/clients", section: "Gestión" },
+      { id: "loan-applications", icon: FileText, label: "Solicitudes", path: "/loan-applications", section: "Créditos" },
+      { id: "loans", icon: HandCoins, label: "Préstamos", path: "/loans/preview", section: "Créditos" },
+      { id: "reports", icon: BarChart3, label: "Reportes de Cartera", path: "/reports/portfolio", section: "Análisis" },
+      { id: "settings", icon: Settings, label: "Configuración", path: "/settings", section: "Sistema" },
     ],
     greeting: (n: string) => `Bienvenido, ${n}`,
   },
@@ -49,41 +69,52 @@ export const ROLES = {
     label: "Oficial de Crédito",
     accent: T.blue500,
     light: T.blue100,
-    badge: "#3B82F6",
-    icon: "🪪",
+    badge: T.blue700,
+    icon: BadgeDollarSign,
     nav: [
-      { id: "dashboard", icon: "▣", label: "Dashboard", path: "/" },
-      { id: "clients", icon: "🧑", label: "Gestión de Clientes", path: "/clients" },
-      { id: "loan-applications", icon: "📋", label: "Solicitudes de Crédito", path: "/loan-applications" },
-      { id: "loans", icon: "💳", label: "Préstamos", path: "/loans/preview" },
-      { id: "reports", icon: "📊", label: "Reportes", path: "/reports/portfolio" },
+      { id: "dashboard", icon: LayoutDashboard, label: "Panel General", path: "/", section: "Resumen" },
+      { id: "clients", icon: UserRound, label: "Clientes", path: "/clients", section: "Gestión" },
+      { id: "loan-applications", icon: FileText, label: "Solicitudes", path: "/loan-applications", section: "Créditos" },
+      { id: "loans", icon: HandCoins, label: "Préstamos", path: "/loans/preview", section: "Créditos" },
+      { id: "reports", icon: BarChart3, label: "Reportes", path: "/reports/portfolio", section: "Análisis" },
     ],
     greeting: (n: string) => `Hola, ${n}`,
   },
 
   Collector: {
     label: "Cobrador",
-    accent: T.orange500,
-    light: T.orange100,
-    badge: T.orange700,
-    icon: "💼",
+    accent: T.amber500,
+    light: T.amber100,
+    badge: T.amber700,
+    icon: Wallet,
     nav: [
-      { id: "dashboard", icon: "▣", label: "Dashboard", path: "/" },
-      { id: "clients", icon: "🧑", label: "Clientes", path: "/clients" },
-      { id: "loans", icon: "💸", label: "Desembolsar Préstamo", path: "/loans/disburse" },
+      { id: "dashboard", icon: LayoutDashboard, label: "Panel General", path: "/", section: "Resumen" },
+      { id: "clients", icon: UserRound, label: "Clientes", path: "/clients", section: "Gestión" },
+      { id: "loans", icon: HandCoins, label: "Desembolsos", path: "/loans/disburse", section: "Operaciones" },
     ],
     greeting: (n: string) => `Buenos días, ${n}`,
   },
 
   Client: {
     label: "Cliente",
-    accent: T.indigo500,
-    light: T.indigo100,
-    badge: "#6366F1",
-    icon: "👤",
+    accent: T.plum500,
+    light: T.plum100,
+    badge: T.plum700,
+    icon: UserRound,
     nav: [],
     greeting: (n: string) => `¡Hola, ${n}!`,
   },
 } as const;
 
 export type Role = keyof typeof ROLES;
+export type RoleConfig = (typeof ROLES)[Role];
+
+export type NavItem = {
+  id: string;
+  label: string;
+  path: string;
+  icon: LucideIcon;
+  section?: string;
+};
+
+export type RolesConfig = typeof ROLES;

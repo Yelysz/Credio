@@ -4,19 +4,34 @@ export interface Employee {
   name?: string;
   firstName?: string;
   lastName?: string;
-  email: string;
+  email?: string;
   phone?: string;
   role?: string;
+  roleName?: string;
   status?: string;
+  statusName?: string;
   createdAt?: string;
   avatarUrl?: string;
+
+  documentNumber?: string;
+  documentType?: string;
+  addressId?: string;
+  isActive?: boolean;
+
   [key: string]: unknown;
 }
 
+export interface EmployeeAddress {
+  streetNumber?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  region?: string;
+  postalCode?: string;
+}
+
 export interface EmployeeDetail extends Employee {
-  documentNumber?: string;
-  documentType?: string;
-  address?: string;
+  address?: string | EmployeeAddress;
 }
 
 export interface GetEmployeesParams {

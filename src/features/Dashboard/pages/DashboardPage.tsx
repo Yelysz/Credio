@@ -23,6 +23,7 @@ const C = {
   sand800: "#2A2724",
   sand900: "#1A1814",
 
+  bgg: "#F4F6F2",
   // Accents
   gold: "#C9933A",
   goldSoft: "#FBF3E6",
@@ -82,8 +83,6 @@ const fmtDate = (v?: string) => {
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 
-
-
 export default function DashboardPage() {
   const { data, isLoading, error, refetch } = useDashboard();
   const [hoveredBar, setHoveredBar] = useState<{
@@ -133,7 +132,7 @@ export default function DashboardPage() {
           justifyContent: "center",
         }}
       >
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: "center", justifyContent: "center" , alignItems: "center", display: "flex", flexDirection: "column"}}>
           <CredioMark size={56} />
           <p
             style={{
@@ -760,7 +759,7 @@ const page: React.CSSProperties = {
   display: "grid",
   gap: 24,
   padding: "clamp(16px, 3vw, 32px)",
-  background: C.cream,
+  background: C.bgg,
   minHeight: "100vh",
   fontFamily: fonts.body,
   gridTemplateRows: "auto",
