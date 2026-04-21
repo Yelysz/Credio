@@ -16,6 +16,7 @@ export const useEmployees = (initialParams?: GetEmployeesParams) => {
     try {
       setIsLoading(true);
       setError(null);
+
       const data = await employeeService.getAll(params);
       setEmployees(Array.isArray(data) ? data : []);
     } catch (err) {

@@ -1,7 +1,6 @@
 export interface Employee {
   id: string;
   employeeCode?: string;
-  name?: string;
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -12,7 +11,6 @@ export interface Employee {
   statusName?: string;
   createdAt?: string;
   avatarUrl?: string;
-
   documentNumber?: string;
   documentType?: string;
   addressId?: string;
@@ -20,6 +18,8 @@ export interface Employee {
 
   [key: string]: unknown;
 }
+
+
 
 export interface EmployeeAddress {
   streetNumber?: string;
@@ -31,7 +31,7 @@ export interface EmployeeAddress {
 }
 
 export interface EmployeeDetail extends Employee {
-  address?: string | EmployeeAddress;
+  address?: EmployeeAddress;
 }
 
 export interface GetEmployeesParams {
@@ -46,6 +46,23 @@ export interface RegisterEmployeePayload {
   email: string;
   phone?: string;
   documentNumber?: string;
+  documentType?: string;
+  role?: string;
+  file?: File | null;
+  address?: {
+    city?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+  };
+}
+
+export interface RegisterEmployeeResponse {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  documentNumber?: string;
+  documentType?: string; 
   role?: string;
   password?: string;
   file?: File | null;
