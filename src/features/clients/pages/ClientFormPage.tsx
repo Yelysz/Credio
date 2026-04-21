@@ -2,8 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useClientForm } from "../hooks/useClientForm";
 import { useCatalogs } from "../../catalog/hooks/useCatalogs";
+import { getUserFromToken } from "@/shared/utils/auth";
+import type { CreateClientPayload } from "../types/client.types";
+import { employeeService } from "../../employee/services/employee.service";
 
-// ─── BRAND TOKENS ─────────────────────────────────────────────────────────────
+
 const C = {
   forest900: "#1A3326",
   forest800: "#22422F",
@@ -31,7 +34,6 @@ const fonts = {
   body: "'Trebuchet MS', 'Lucida Sans Unicode', sans-serif",
 };
 
-// ─── STATIC DATA ──────────────────────────────────────────────────────────────
 const REGIONS = [
   { id: "SD", name: "Santo Domingo" },
   { id: "DN", name: "Distrito Nacional" },
@@ -57,25 +59,22 @@ const CITIES_BY_REGION: Record<string, Array<{ id: string; name: string }>> = {
   ],
 };
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
 type ClientFormState = {
   firstName: string;
   lastName: string;
+  age: string;
   email: string;
   phone: string;
   documentNumber: string;
   documentType: string;
-  occupation: string;
-  employer: string;
-  monthlyIncome: string;
-  address: string;
-  region: string;
+  streetNumber: string;
+  addressLine1: string;
+  addressLine2: string;
+  region: string; // guarda el id de REGIONS
   city: string;
-};
-
-type CreateClientPayload = ClientFormState & {
-  monthlyIncome: number;
-  file: File | null;
+  postalCode: string;
+  homeLatitude: string;
+  homeLongitude: string;
 };
 
 type SelectOption = {
@@ -113,7 +112,7 @@ type FormCardProps = {
   children: React.ReactNode;
 };
 
-// ─── PAGE ─────────────────────────────────────────────────────────────────────
+
 export default function ClientFormPage() {
   const navigate = useNavigate();
   const { createClient, isSubmitting, error } = useClientForm();
@@ -126,16 +125,19 @@ export default function ClientFormPage() {
   const [form, setForm] = useState<ClientFormState>({
     firstName: "",
     lastName: "",
+    age: "",
     email: "",
     phone: "",
     documentNumber: "",
     documentType: "",
-    occupation: "",
-    employer: "",
-    monthlyIncome: "",
-    address: "",
+    streetNumber: "",
+    addressLine1: "",
+    addressLine2: "",
     region: "",
     city: "",
+    postalCode: "",
+    homeLatitude: "",
+    homeLongitude: "",
   });
 
   const [file, setFile] = useState<File | null>(null);
@@ -148,11 +150,16 @@ export default function ClientFormPage() {
   const validate = (): string | null => {
     if (!form.firstName.trim()) return "El nombre es obligatorio.";
     if (!form.lastName.trim()) return "El apellido es obligatorio.";
+    if (!form.age.trim()) return "La edad es obligatoria.";
     if (!form.documentType) return "Debe seleccionar un tipo de documento.";
     if (!form.documentNumber.trim())
       return "El número de documento es obligatorio.";
     if (!form.phone.trim()) return "El teléfono es obligatorio.";
-    if (!form.address.trim()) return "La dirección es obligatoria.";
+    if (!form.streetNumber.trim()) return "El número de calle es obligatorio.";
+    if (!form.addressLine1.trim())
+      return "La dirección línea 1 es obligatoria.";
+    if (!form.region.trim()) return "La región es obligatoria.";
+    if (!form.city.trim()) return "La ciudad es obligatoria.";
     return null;
   };
 
@@ -166,10 +173,46 @@ export default function ClientFormPage() {
       return;
     }
 
+    const currentUser = getUserFromToken() as { sub?: string } | null;
+    const employeeCode = currentUser?.sub ?? "";
+
+    if (!employeeCode) {
+      setLocalError(
+        "No se pudo obtener el código del empleado desde el token.",
+      );
+      return;
+    }
+
+    const employee = await employeeService.getByCode(employeeCode);
+    const employeeId = employee.id;
+
+    if (!employeeId) {
+      setLocalError("No se pudo resolver el EmployeeId.");
+      return;
+    }
+
+    const selectedRegion = REGIONS.find((r) => r.id === form.region);
+
     const payload: CreateClientPayload = {
-      ...form,
-      monthlyIncome: Number(form.monthlyIncome) || 0,
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      age: Number(form.age) || 0,
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      documentNumber: form.documentNumber.trim(),
+      documentType: form.documentType.trim(),
+      employeeId,
+      homeLatitude: Number(form.homeLatitude) || 0,
+      homeLongitude: Number(form.homeLongitude) || 0,
       file,
+      addressDto: {
+        streetNumber: form.streetNumber.trim(),
+        addressLine1: form.addressLine1.trim(),
+        addressLine2: form.addressLine2.trim(),
+        city: form.city.trim(),
+        region: selectedRegion?.name ?? "",
+        postalCode: form.postalCode.trim(),
+      },
     };
 
     const ok = await createClient(payload);
@@ -190,8 +233,6 @@ export default function ClientFormPage() {
                 fontWeight: 700,
                 fontSize: 16,
                 color: C.sand900,
-                letterSpacing: "-.3px",
-                lineHeight: "1.1",
               }}
             >
               Credio
@@ -212,11 +253,7 @@ export default function ClientFormPage() {
 
         <div style={breadcrumb}>
           <span
-            style={{
-              color: C.forest600,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
+            style={{ color: C.forest600, fontWeight: 600, cursor: "pointer" }}
             onClick={() => navigate("/clients")}
           >
             Clientes
@@ -242,7 +279,6 @@ export default function ClientFormPage() {
           >
             Cancelar
           </button>
-
           <button
             form="client-form"
             type="submit"
@@ -281,6 +317,13 @@ export default function ClientFormPage() {
             onChange={(v) => set("lastName", v)}
             placeholder="Ej. María"
           />
+          <Field
+            label="Edad"
+            value={form.age}
+            onChange={(v) => set("age", v)}
+            type="number"
+            placeholder="Ej. 28"
+          />
           <SelectField
             label="Tipo de documento"
             value={form.documentType}
@@ -313,43 +356,31 @@ export default function ClientFormPage() {
           />
         </FormCard>
 
-        <FormCard
-          title="Perfil Financiero y Laboral"
-          accentColor={C.sky}
-          badge="Información de Riesgo"
-        >
-          <Field
-            label="Ocupación"
-            value={form.occupation}
-            onChange={(v) => set("occupation", v)}
-            placeholder="Ej. Contador"
-          />
-          <Field
-            label="Empleador / Negocio"
-            value={form.employer}
-            onChange={(v) => set("employer", v)}
-            placeholder="Nombre de la empresa"
-          />
-          <div style={{ gridColumn: "span 2" }}>
-            <Field
-              label="Ingreso Mensual (RD$)"
-              value={form.monthlyIncome}
-              onChange={(v) => set("monthlyIncome", v)}
-              type="number"
-              placeholder="Ej. 45000"
-            />
-          </div>
-        </FormCard>
-
         <FormCard title="Ubicación" accentColor={C.gold} badge="Requerido">
-          <div style={{ gridColumn: "span 2" }}>
-            <Field
-              label="Dirección Detallada"
-              value={form.address}
-              onChange={(v) => set("address", v)}
-              placeholder="Calle, # casa, sector..."
-            />
-          </div>
+          <Field
+            label="Número de calle"
+            value={form.streetNumber}
+            onChange={(v) => set("streetNumber", v)}
+            placeholder="Ej. 265"
+          />
+          <Field
+            label="Dirección línea 1"
+            value={form.addressLine1}
+            onChange={(v) => set("addressLine1", v)}
+            placeholder="Calle Central, Ensanche Luperón"
+          />
+          <Field
+            label="Dirección línea 2"
+            value={form.addressLine2}
+            onChange={(v) => set("addressLine2", v)}
+            placeholder="Apto, referencia, sector..."
+          />
+          <Field
+            label="Código postal"
+            value={form.postalCode}
+            onChange={(v) => set("postalCode", v)}
+            placeholder="Ej. 10401"
+          />
 
           <SelectField
             label="Región"
@@ -358,10 +389,7 @@ export default function ClientFormPage() {
               set("region", v);
               set("city", "");
             }}
-            options={REGIONS.map((r) => ({
-              value: r.id,
-              label: r.name,
-            }))}
+            options={REGIONS.map((r) => ({ value: r.id, label: r.name }))}
             placeholder="Seleccione región"
           />
 
@@ -373,8 +401,27 @@ export default function ClientFormPage() {
               value: c.name,
               label: c.name,
             }))}
-            placeholder={form.region ? "Seleccione ciudad" : "Primero elija región"}
+            placeholder={
+              form.region ? "Seleccione ciudad" : "Primero elija región"
+            }
             disabled={!form.region}
+          />
+        </FormCard>
+
+        <FormCard title="Coordenadas" accentColor={C.sky} badge="Opcional">
+          <Field
+            label="Latitud"
+            value={form.homeLatitude}
+            onChange={(v) => set("homeLatitude", v)}
+            type="number"
+            placeholder="Ej. 18.4861"
+          />
+          <Field
+            label="Longitud"
+            value={form.homeLongitude}
+            onChange={(v) => set("homeLongitude", v)}
+            type="number"
+            placeholder="Ej. -69.9312"
           />
         </FormCard>
 
@@ -398,32 +445,9 @@ export default function ClientFormPage() {
           </div>
         )}
       </form>
-
-      <footer
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          padding: "20px 0",
-        }}
-      >
-        <CredioMark size={20} />
-        <span
-          style={{
-            fontFamily: fonts.body,
-            fontSize: 12,
-            color: C.sand400,
-          }}
-        >
-          Credio · Sistema de Gestión · {new Date().getFullYear()}
-        </span>
-      </footer>
     </div>
   );
 }
-
-// ─── REUSED UI COMPONENTS ─────────────────────────────────────────────────────
 
 function CredioMark({ size = 34 }: { size?: number }) {
   return (
@@ -431,36 +455,14 @@ function CredioMark({ size = 34 }: { size?: number }) {
       style={{
         width: size,
         height: size,
-        borderRadius: Math.round(size * 0.265),
+        borderRadius: 10,
         background: C.forest800,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
       }}
-    >
-      <svg width={size * 0.5} height={size * 0.5} viewBox="0 0 24 24" fill="none">
-        <path
-          d="M18 6C14 4 8 5 6 10C4.5 14 6 18 10 19.5C7 17 7 13 9 10.5C11 8 15 7.5 18 9C17 7.5 17.5 6.5 18 6Z"
-          fill="white"
-          opacity="0.9"
-        />
-        <path
-          d="M8 14C9 17 12 19 15 18.5C17 18 19 16 19.5 14C18 16 15 17 13 16C11 15 9.5 13 10 11C9 11.5 8 12.5 8 14Z"
-          fill="white"
-          opacity="0.55"
-        />
-      </svg>
-    </div>
+    />
   );
 }
 
-function FormCard({
-  title,
-  accentColor,
-  badge,
-  children,
-}: FormCardProps) {
+function FormCard({ title, accentColor, badge, children }: FormCardProps) {
   return (
     <div
       style={{
@@ -498,7 +500,6 @@ function FormCard({
         >
           {title}
         </h2>
-
         {badge && (
           <span
             style={{
@@ -515,7 +516,6 @@ function FormCard({
           </span>
         )}
       </div>
-
       <div
         style={{
           padding: 20,
@@ -566,10 +566,7 @@ function SelectField({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          ...inputStyle,
-          background: disabled ? C.sand100 : C.cream,
-        }}
+        style={{ ...inputStyle, background: disabled ? C.sand100 : C.cream }}
       >
         <option value="">{placeholder}</option>
         {options.map((o) => (
@@ -618,7 +615,6 @@ function FileUpload({ file, onChange, label }: FileUploadProps) {
   );
 }
 
-// ─── SHARED STYLES ───────────────────────────────────────────────────────────
 const page: React.CSSProperties = {
   display: "grid",
   gap: 18,
@@ -626,7 +622,6 @@ const page: React.CSSProperties = {
   background: C.cream,
   minHeight: "100vh",
 };
-
 const nav: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
@@ -636,14 +631,12 @@ const nav: React.CSSProperties = {
   padding: "12px 18px",
   border: `1px solid ${C.sand200}`,
 };
-
 const breadcrumb: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   gap: 6,
   fontSize: 12,
 };
-
 const heroStrip: React.CSSProperties = {
   background: C.forest900,
   borderRadius: 14,
@@ -652,7 +645,6 @@ const heroStrip: React.CSSProperties = {
   justifyContent: "space-between",
   alignItems: "center",
 };
-
 const heroTitle: React.CSSProperties = {
   fontFamily: fonts.display,
   fontSize: 24,
@@ -660,13 +652,11 @@ const heroTitle: React.CSSProperties = {
   color: C.white,
   margin: 0,
 };
-
 const heroSub: React.CSSProperties = {
   fontSize: 12,
   color: C.forest100,
   marginTop: 4,
 };
-
 const btnCancel: React.CSSProperties = {
   padding: "9px 16px",
   borderRadius: 9,
@@ -676,7 +666,6 @@ const btnCancel: React.CSSProperties = {
   fontWeight: 600,
   cursor: "pointer",
 };
-
 const btnSubmit: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
@@ -689,7 +678,6 @@ const btnSubmit: React.CSSProperties = {
   fontWeight: 700,
   cursor: "pointer",
 };
-
 const btnSubmitIcon: React.CSSProperties = {
   width: 18,
   height: 18,
@@ -700,7 +688,6 @@ const btnSubmitIcon: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
 };
-
 const fieldLabel: React.CSSProperties = {
   fontSize: 11,
   fontWeight: 700,
@@ -708,7 +695,6 @@ const fieldLabel: React.CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: "0.7px",
 };
-
 const inputStyle: React.CSSProperties = {
   padding: "9px 12px",
   borderRadius: 9,
@@ -717,7 +703,6 @@ const inputStyle: React.CSSProperties = {
   fontSize: 13,
   outline: "none",
 };
-
 const fileDropStyle: React.CSSProperties = {
   border: `1.5px dashed ${C.sand200}`,
   borderRadius: 9,
@@ -728,7 +713,6 @@ const fileDropStyle: React.CSSProperties = {
   gap: 6,
   cursor: "pointer",
 };
-
 const errorBar: React.CSSProperties = {
   background: C.coralSoft,
   border: "1px solid #f7c8c5",

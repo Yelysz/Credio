@@ -97,6 +97,14 @@ export const employeeService = {
     return data.data;
   },
 
+  async getByCode(employeeCode: string) {
+  const { data } = await lendingApi.get<ApiResponse<EmployeeDetail>>(
+    `/api/v1/employee/by-code/${employeeCode}`
+  );
+
+  return data.data;
+},
+
   async getById(id: string) {
     const { data } = await lendingApi.get<ApiResponse<EmployeeDetail>>(
       `/api/v1/employee/by-id/${id}`

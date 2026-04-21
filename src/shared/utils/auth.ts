@@ -3,10 +3,17 @@ import type { Role as AuthRole } from "@/features/auth/types/auth.types";
 import type { Role as LayoutRole } from "@/shared/types/layout.types";
 
 interface TokenPayload {
-  firstName: string;
-  lastName: string;
-  email: string;
-  roles: AuthRole[];
+  sub?: string;
+  uid?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  roles?: AuthRole | AuthRole[];
+}
+
+function normalizeRoles(roles?: AuthRole | AuthRole[]): AuthRole[] {
+  if (!roles) return [];
+  return Array.isArray(roles) ? roles : [roles];
 }
 
 function mapAuthRoleToLayoutRole(roles: AuthRole[]): LayoutRole {
@@ -26,6 +33,8 @@ function mapAuthRoleToLayoutRole(roles: AuthRole[]): LayoutRole {
 }
 
 export function getUserFromToken(): {
+  sub: string;
+  uid: string;
   name: string;
   email: string;
   role: LayoutRole;
@@ -47,9 +56,11 @@ export function getUserFromToken(): {
 
   try {
     const decoded = jwtDecode<TokenPayload>(token);
-    const roles = decoded.roles ?? [];
+    const roles = normalizeRoles(decoded.roles);
 
     return {
+      sub: decoded.sub ?? "",
+      uid: decoded.uid ?? "",
       name: `${decoded.firstName ?? ""} ${decoded.lastName ?? ""}`.trim(),
       email: decoded.email ?? "",
       role: mapAuthRoleToLayoutRole(roles),

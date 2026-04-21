@@ -1,3 +1,12 @@
+export interface AddressDto {
+  streetNumber: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  region: string;
+  postalCode: string;
+}
+
 export interface Client {
   id: string;
   firstName?: string;
@@ -6,23 +15,21 @@ export interface Client {
   name?: string;
   email?: string;
   phone?: string;
-  documentNumber?: string;
   documentType?: string;
+  documentNumber?: string;
   status?: string;
-  address?: string;
-  avatarUrl?: string;
-  createdAt?: string;
-  [key: string]: unknown;
 }
 
 export interface ClientDetail extends Client {
-  monthlyIncome?: number;
-  occupation?: string;
-  employer?: string;
+  age?: number;
+  address?: AddressDto | null;
+  homeLatitude?: number;
+  homeLongitude?: number;
+  urlImage?: string | null;
 }
 
 export interface GetClientsParams {
-  pageNumber?: number;
+  page?: number;
   pageSize?: number;
   search?: string;
 }
@@ -30,12 +37,16 @@ export interface GetClientsParams {
 export interface CreateClientPayload {
   firstName: string;
   lastName: string;
-  email?: string;
-  phone?: string;
-  documentNumber?: string;
-  documentType?: string;
-  address?: string;
-  file?: File | null;
+  age: number;
+  email: string;
+  documentType: string;
+  phone: string;
+  documentNumber: string;
+  employeeId: string;
+  homeLatitude: number;
+  homeLongitude: number;
+  file: File | null;
+  addressDto: AddressDto;
 }
 
 export interface UpdateClientPayload {
@@ -43,8 +54,4 @@ export interface UpdateClientPayload {
   lastName?: string;
   email?: string;
   phone?: string;
-  documentNumber?: string;
-  documentType?: string;
-  address?: string;
-  status?: string;
 }

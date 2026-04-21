@@ -53,3 +53,11 @@ export interface DisburseLoanPayload {
   disbursementDate?: string;
   notes?: string;
 }
+
+export interface FieldProps {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: React.HTMLInputTypeAttribute;
+  placeholder?: string;
+}
