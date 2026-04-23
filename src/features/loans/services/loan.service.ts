@@ -20,11 +20,7 @@ type ApiEnvelope<T> = {
 };
 
 const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "data" in payload
-  ) {
+  if (payload && typeof payload === "object" && "data" in payload) {
     return (payload as ApiEnvelope<T>).data as T;
   }
 
@@ -33,19 +29,19 @@ const unwrap = <T>(payload: T | ApiEnvelope<T>): T => {
 
 export const loanService = {
   async previewAmortization(params: PreviewAmortizationParams) {
-    const response = await lendingApi.get<ApiEnvelope<Installment[]> | Installment[]>(
-      "/api/v1/loan/preview-amortization",
-      { params }
-    );
+    const response = await lendingApi.get<
+      ApiEnvelope<Installment[]> | Installment[]
+    >("/api/v1/loan/preview-amortization", {
+      params,
+    });
 
     return unwrap<Installment[]>(response.data);
   },
 
   async createLoanApplication(payload: CreateLoanApplicationPayload) {
-    const response = await lendingApi.post<ApiEnvelope<LoanApplication> | LoanApplication>(
-      "/api/v1/loan-application/create",
-      payload
-    );
+    const response = await lendingApi.post<
+      ApiEnvelope<LoanApplication> | LoanApplication
+    >("/api/v1/loan-application/create", payload);
 
     return unwrap<LoanApplication>(response.data);
   },

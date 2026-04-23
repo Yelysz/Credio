@@ -40,7 +40,15 @@ export const loanAcceptanceService = {
     >("/api/v1/loan-application/all");
 
     const data = unwrap<LoanApplicationItem[]>(response);
-    return Array.isArray(data) ? data : [];
+    const list = Array.isArray(data) ? data : [];
+
+    const pending = list.filter((item) => {
+      const status = String(item.applicationStatusName ?? "").trim().toLowerCase();
+
+      return status === "pending" || status === "pendiente";
+    });
+
+    return pending;
   },
 
   async getById(id: string) {

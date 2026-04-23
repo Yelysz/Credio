@@ -1,6 +1,6 @@
 import type { SimulationInstallment } from "../../types/loanApplication.types";
 import { formatCurrency } from "../../utils/loanApplicationFormatters";
-import { card, cardHead, footerNav, btnBack, btnNext } from "./ClientSelectionStep";
+import { card, cardHead, footerNav, btnNext, btnBack } from "./styles";
 
 // ─── BRAND TOKENS ─────────────────────────────────────────────────────────────
 const C = {

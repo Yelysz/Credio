@@ -2,7 +2,7 @@ import type {
   LoanApplicationFormData,
   PaymentFrequency,
 } from "../../types/loanApplication.types";
-import { card, cardHead, footerNav, btnBack, btnNext } from "./ClientSelectionStep";
+import { card, cardHead, footerNav, btnNext, btnBack } from "./styles";
 
 const C = {
   forest600: "#3A6E4A", sand100: "#F0EDE8", sand200: "#DDD9D2",

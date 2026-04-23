@@ -9,6 +9,8 @@ interface TokenPayload {
   lastName?: string;
   email?: string;
   roles?: AuthRole | AuthRole[];
+  employeeId?: string;
+  clientId?: string;
 }
 
 function normalizeRoles(roles?: AuthRole | AuthRole[]): AuthRole[] {
@@ -39,6 +41,8 @@ export function getUserFromToken(): {
   email: string;
   role: LayoutRole;
   roles: AuthRole[];
+  employeeId: string;
+  clientId: string;
 } | null {
   const rawToken = localStorage.getItem("auth_token");
 
@@ -65,6 +69,8 @@ export function getUserFromToken(): {
       email: decoded.email ?? "",
       role: mapAuthRoleToLayoutRole(roles),
       roles,
+      employeeId: decoded.employeeId ?? "",
+      clientId: decoded.clientId ?? "",
     };
   } catch (error) {
     console.error("Token inválido:", error);

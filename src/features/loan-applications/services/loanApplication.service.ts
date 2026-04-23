@@ -8,8 +8,6 @@ import type {
   SimulationResult,
 } from "../types/loanApplication.types";
 import { getUserFromToken } from "@/shared/utils/auth";
-import { employeeService } from "../../employee/services/employee.service";
-
 
 const unwrapResponse = <T>(responseData: T | ApiResponse<T>): T => {
   if (
@@ -62,49 +60,33 @@ export const loanApplicationService = {
     return unwrapResponse<SimulationResult>(data);
   },
 
-async create(payload: CreateLoanApplicationPayload) {
-  // 🔥 1. obtener usuario logueado
-  const currentUser = getUserFromToken();
+  async create(payload: CreateLoanApplicationPayload) {
+    const currentUser = getUserFromToken();
 
-  if (!currentUser?.email) {
-    throw new Error("No se pudo obtener el usuario autenticado.");
-  }
+    if (!currentUser) {
+      throw new Error("No se pudo obtener el usuario autenticado.");
+    }
 
-  // 🔥 2. buscar el empleado real en el backend
-  const employees = await employeeService.getAll({
-    pageNumber: 1,
-    pageSize: 1000,
-  });
+    if (!currentUser.employeeId) {
+      console.error("TOKEN USER:", currentUser);
+      throw new Error("No se encontró el employeeId en el token.");
+    }
 
-  const employee = employees.find(
-    (item) =>
-      item.email?.trim().toLowerCase() ===
-      currentUser.email.trim().toLowerCase()
-  );
+    const finalPayload = {
+      requestedAmount: payload.requestedAmount,
+      requestedInterestRate: payload.requestedInterestRate,
+      requestedTerm: payload.requestedTerm,
+      clientId: payload.clientId,
+      employeeId: currentUser.employeeId,
+      paymentFrequencyId: payload.paymentFrequencyId,
+    };
 
-  if (!employee || !employee.id) {
-    console.error("USER:", currentUser);
-    console.error("EMPLOYEES:", employees);
+    console.log("FINAL PAYLOAD:", finalPayload);
 
-    throw new Error("No se encontró el empleado asociado al usuario.");
-  }
+    const { data } = await lendingApi.post<
+      ApiResponse<unknown> | unknown
+    >("/api/v1/loan-application/create", finalPayload);
 
-  const finalPayload = {
-    requestedAmount: payload.requestedAmount,
-    requestedInterestRate: payload.requestedInterestRate,
-    requestedTerm: payload.requestedTerm,
-    clientId: payload.clientId,
-    employeeId: employee.id, // ✅ FIX AQUÍ
-    paymentFrequencyId: payload.paymentFrequencyId,
-  };
-
-  console.log("FINAL PAYLOAD:", finalPayload);
-
-  const { data } = await lendingApi.post(
-    "/api/v1/loan-application/create",
-    finalPayload
-  );
-
-  return unwrapResponse(data);
-}
+    return unwrapResponse(data);
+  },
 };
