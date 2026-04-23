@@ -21,6 +21,9 @@ import LoanSchedulePage from "@/features/loans/pages/LoanSchedulePage";
 
 import PortfolioReportPage from "@/features/reports/pages/PortfolioReportPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
+import PaymentsPage from "@/features/payments/pages/PaymentsPage";
+import LoanAcceptancePage from "@/features/loan-applications/pages/LoanAcceptancePage";
+import LoanSimulationPage from "@/features/loan-applications/pages/LoanSimulationPage";
 
 import NewLoanApplicationPage from "@/features/loan-applications/pages/NewLoanApplicationPage";
 
@@ -127,12 +130,16 @@ export function AppRouter() {
         element={allow(["Administrator"], <SettingsPage />)}
       />
 
+      <Route path="/loan-applications/acceptance" element={<LoanAcceptancePage />} />
+<Route path="/loan-applications/simulation" element={<LoanSimulationPage />} />
+
         <Route
         path="/loan-applications"
         element={<NewLoanApplicationPage />}
       />
 
 
+<Route path="/payments" element={<PaymentsPage />} />
 
       <Route path="/access-denied" element={<AccessDeniedPage />} />
       <Route path="*" element={<NotFoundPage />} />

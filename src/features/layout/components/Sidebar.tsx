@@ -173,6 +173,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   );
 };
 
+
 function CredioMark({ size = 34 }: { size?: number }) {
   return (
     <div

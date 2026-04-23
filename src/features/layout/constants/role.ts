@@ -10,6 +10,7 @@ import {
   BadgeDollarSign,
   Wallet,
   ShieldCheck,
+  Banknote  
 } from "lucide-react";
 
 export const T = {
@@ -57,8 +58,15 @@ export const ROLES = {
       { id: "dashboard", icon: LayoutDashboard, label: "Panel General", path: "/", section: "Resumen" },
       { id: "employees", icon: Users, label: "Empleados", path: "/employees", section: "Gestión" },
       { id: "clients", icon: UserRound, label: "Clientes", path: "/clients", section: "Gestión" },
-      { id: "loan-applications", icon: FileText, label: "Solicitudes", path: "/loan-applications", section: "Créditos" },
-      { id: "loans", icon: HandCoins, label: "Préstamos", path: "/loans/preview", section: "Créditos" },
+     { id: "loan-applications", icon: FileText, label: "Solicitudes", path: "/loan-applications", section: "Créditos" },
+      { id: "loans", icon: HandCoins, label: "Préstamos", path: "/loan-applications/acceptance", section: "Créditos" },
+            {
+        id: "payments",
+        icon: Banknote ,
+        label: "Pagos",
+        path: "/payments",
+        section: "Créditos" 
+      },
       { id: "reports", icon: BarChart3, label: "Reportes de Cartera", path: "/reports/portfolio", section: "Análisis" },
       { id: "settings", icon: Settings, label: "Configuración", path: "/settings", section: "Sistema" },
     ],
@@ -75,7 +83,14 @@ export const ROLES = {
       { id: "dashboard", icon: LayoutDashboard, label: "Panel General", path: "/", section: "Resumen" },
       { id: "clients", icon: UserRound, label: "Clientes", path: "/clients", section: "Gestión" },
       { id: "loan-applications", icon: FileText, label: "Solicitudes", path: "/loan-applications", section: "Créditos" },
-      { id: "loans", icon: HandCoins, label: "Préstamos", path: "/loans/preview", section: "Créditos" },
+    //  { id: "loans", icon: HandCoins, label: "Préstamos", path: "/loan-applications/acceptance", section: "Créditos" },
+            {
+        id: "payments",
+        icon: Banknote ,
+        label: "Pagos",
+        path: "/payments",
+        section: "Créditos" 
+      },
       { id: "reports", icon: BarChart3, label: "Reportes", path: "/reports/portfolio", section: "Análisis" },
     ],
     greeting: (n: string) => `Hola, ${n}`,
@@ -91,6 +106,13 @@ export const ROLES = {
       { id: "dashboard", icon: LayoutDashboard, label: "Panel General", path: "/", section: "Resumen" },
       { id: "clients", icon: UserRound, label: "Clientes", path: "/clients", section: "Gestión" },
       { id: "loans", icon: HandCoins, label: "Desembolsos", path: "/loans/disburse", section: "Operaciones" },
+      {
+        id: "payments",
+        icon: Banknote ,
+        label: "Pagos",
+        path: "/payments",
+        section: "Créditos" 
+      },
     ],
     greeting: (n: string) => `Buenos días, ${n}`,
   },

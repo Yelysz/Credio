@@ -7,6 +7,9 @@ import type {
   SimulateLoanApplicationParams,
   SimulationResult,
 } from "../types/loanApplication.types";
+import { getUserFromToken } from "@/shared/utils/auth";
+import { employeeService } from "../../employee/services/employee.service";
+
 
 const unwrapResponse = <T>(responseData: T | ApiResponse<T>): T => {
   if (
@@ -60,14 +63,42 @@ export const loanApplicationService = {
   },
 
 async create(payload: CreateLoanApplicationPayload) {
+  // 🔥 1. obtener usuario logueado
+  const currentUser = getUserFromToken();
+
+  if (!currentUser?.email) {
+    throw new Error("No se pudo obtener el usuario autenticado.");
+  }
+
+  // 🔥 2. buscar el empleado real en el backend
+  const employees = await employeeService.getAll({
+    pageNumber: 1,
+    pageSize: 1000,
+  });
+
+  const employee = employees.find(
+    (item) =>
+      item.email?.trim().toLowerCase() ===
+      currentUser.email.trim().toLowerCase()
+  );
+
+  if (!employee || !employee.id) {
+    console.error("USER:", currentUser);
+    console.error("EMPLOYEES:", employees);
+
+    throw new Error("No se encontró el empleado asociado al usuario.");
+  }
+
   const finalPayload = {
     requestedAmount: payload.requestedAmount,
     requestedInterestRate: payload.requestedInterestRate,
     requestedTerm: payload.requestedTerm,
     clientId: payload.clientId,
-    employeeId: payload.employeeId,
+    employeeId: employee.id, // ✅ FIX AQUÍ
     paymentFrequencyId: payload.paymentFrequencyId,
   };
+
+  console.log("FINAL PAYLOAD:", finalPayload);
 
   const { data } = await lendingApi.post(
     "/api/v1/loan-application/create",
@@ -75,5 +106,5 @@ async create(payload: CreateLoanApplicationPayload) {
   );
 
   return unwrapResponse(data);
-},
+}
 };

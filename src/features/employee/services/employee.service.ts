@@ -98,12 +98,12 @@ export const employeeService = {
   },
 
   async getByCode(employeeCode: string) {
-  const { data } = await lendingApi.get<ApiResponse<EmployeeDetail>>(
-    `/api/v1/employee/by-code/${employeeCode}`
-  );
+    const { data } = await lendingApi.get<ApiResponse<EmployeeDetail>>(
+      `/api/v1/employee/by-code/${employeeCode}`
+    );
 
-  return data.data;
-},
+    return data.data;
+  },
 
   async getById(id: string) {
     const { data } = await lendingApi.get<ApiResponse<EmployeeDetail>>(
@@ -111,5 +111,30 @@ export const employeeService = {
     );
 
     return data.data;
+  },
+
+  async getByEmail(email: string) {
+    const employees = await this.getAll();
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const employee = employees.find(
+      (item) => (item.email ?? "").trim().toLowerCase() === normalizedEmail
+    );
+
+    if (!employee) {
+      throw new Error("No se encontró un empleado con el email del usuario logueado.");
+    }
+
+    if (!employee.id) {
+      throw new Error("El empleado encontrado no tiene id.");
+    }
+
+    return employee;
+  },
+
+  async resolveCurrentEmployeeId(email: string) {
+    const employee = await this.getByEmail(email);
+    return employee.id;
   },
 };

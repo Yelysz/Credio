@@ -11,6 +11,11 @@ interface ApiResponse<T> {
   data: T;
 }
 
+
+//await lendingApi.get("/api/v1/settings/all", {
+  params: { documentNumber: "00112345678" }
+//});
+
 export const settingsService = {
   async getAll() {
     const response = await lendingApi.get<ApiResponse<SystemSetting[]>>(
