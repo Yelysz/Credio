@@ -26,6 +26,7 @@ import LoanAcceptancePage from "@/features/loan-applications/pages/LoanAcceptanc
 import LoanSimulationPage from "@/features/loan-applications/pages/LoanSimulationPage";
 
 import NewLoanApplicationPage from "@/features/loan-applications/pages/NewLoanApplicationPage";
+import LoanManagementPage from "@/features/loans/pages/LoanManagementPage";
 
 
 function AccessDeniedPage() {
@@ -130,14 +131,16 @@ export function AppRouter() {
         element={allow(["Administrator"], <SettingsPage />)}
       />
 
-      <Route path="/loan-applications/acceptance" element={<LoanAcceptancePage />} />
+      <Route path="acceptance" element={<LoanAcceptancePage />} />
 <Route path="/loan-applications/simulation" element={<LoanSimulationPage />} />
 
         <Route
         path="/loan-applications"
         element={<NewLoanApplicationPage />}
       />
-
+   <Route
+        path="/loan-management"
+        element={<LoanManagementPage />} />
 
 <Route path="/payments" element={<PaymentsPage />} />
 

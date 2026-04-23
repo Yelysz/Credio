@@ -34,7 +34,7 @@ export default function LoanAcceptancePage() {
   const navigate = useNavigate();
   const {
     applications, selectedApplication,
-    isLoading, isDetailLoading, isApproving, error,
+    isLoading, isApproving, error,
     fetchDetail, approve,
   } = useLoanAcceptance();
 
@@ -84,7 +84,7 @@ export default function LoanAcceptancePage() {
 
   const goToSimulation = () => {
     if (!selectedApplication) return;
-    navigate("/loan-applications/simulation", {
+    navigate("/loan-management", {
       state: {
         application: {
           ...selectedApplication,

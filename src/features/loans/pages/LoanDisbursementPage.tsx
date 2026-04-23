@@ -1,8 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLoanDisbursement } from "../hooks/useLoanDisbursement";
 import { C, fonts } from "../../loan-applications/components/steps/styles";
 import type { Installment } from "../types/loan.types";
+
+type LoanApplicationState = {
+  id?: string;
+  applicationCode?: string;
+  clientName?: string;
+  approvedAmount?: number | null;
+  approvedInterestRate?: number | null;
+  approvedTerm?: number | null;
+  paymentFrequency?: string | null;
+};
+
+type LocationState = {
+  application?: LoanApplicationState;
+};
 
 const money = (v?: number | null) =>
   new Intl.NumberFormat("es-DO", {
@@ -14,7 +28,7 @@ const money = (v?: number | null) =>
 const fmtDate = (v?: string) => {
   if (!v) return "—";
   const d = new Date(v);
-  return isNaN(d.getTime())
+  return Number.isNaN(d.getTime())
     ? v
     : d.toLocaleDateString("es-DO", {
         day: "2-digit",
@@ -23,10 +37,38 @@ const fmtDate = (v?: string) => {
       });
 };
 
+const getRowNumber = (row: Installment, index: number) =>
+  Number(
+    (row as Record<string, unknown>).installmentNumber ??
+      (row as Record<string, unknown>).period ??
+      index + 1
+  );
+
+const getRowPayment = (row: Installment) =>
+  Number(
+    (row as Record<string, unknown>).installmentAmount ??
+      (row as Record<string, unknown>).payment ??
+      0
+  );
+
+const getRowPrincipal = (row: Installment) =>
+  Number((row as Record<string, unknown>).principal ?? 0);
+
+const getRowInterest = (row: Installment) =>
+  Number((row as Record<string, unknown>).interest ?? 0);
+
+const getRowBalance = (row: Installment) =>
+  Number((row as Record<string, unknown>).balance ?? 0);
+
+const getRowStatus = (row: Installment) =>
+  String(
+    (row as Record<string, unknown>).installmentStatusName ?? "Pendiente"
+  );
+
 export default function LoanDisbursementPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const application = location.state?.application;
+  const { application } = (location.state as LocationState) ?? {};
 
   const {
     preview,
@@ -46,23 +88,24 @@ export default function LoanDisbursementPage() {
   const [activeTab, setActiveTab] = useState<"preview" | "schedule">("preview");
 
   useEffect(() => {
-    if (!application) {
+    if (!application?.id) {
       navigate("/loan-applications/acceptance");
       return;
     }
 
-    void fetchPreview(
-      application.approvedAmount,
-      application.approvedInterestRate,
-      application.approvedTerm,
-      application.paymentFrequency || "MONTHLY"
-    );
-  }, [application]);
+    void fetchPreview(application.id);
+  }, [application?.id, fetchPreview, navigate]);
 
   const handleCreateAndDisburse = async () => {
     if (!application?.id) return;
+
     try {
       const createdLoan = await createLoan(application.id);
+
+      if (!createdLoan?.id) {
+        throw new Error("No se pudo obtener el id del préstamo creado.");
+      }
+
       await disburseLoan(createdLoan.id);
       setDisbursed(true);
       await fetchSchedule(createdLoan.id);
@@ -72,15 +115,13 @@ export default function LoanDisbursementPage() {
     }
   };
 
-  if (!application) {
-    return null;
-  }
+  if (!application) return null;
 
-  const monthlyPayment = preview?.[0]?.payment || 0;
+  const monthlyPayment =
+    preview && preview.length > 0 ? getRowPayment(preview[0]) : 0;
 
   return (
     <div style={page}>
-      {/* NAV */}
       <nav style={nav}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <CredioMark size={34} />
@@ -110,29 +151,33 @@ export default function LoanDisbursementPage() {
             </div>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button
-            type="button"
-            onClick={() => navigate("/loan-applications/acceptance")}
-            style={backBtn}
-          >
-            ← Volver
-          </button>
-        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate("/loan-applications/acceptance")}
+          style={backBtn}
+        >
+          ← Volver
+        </button>
       </nav>
 
-      {/* HERO */}
       <div style={heroStrip}>
         <div>
           <h1 style={heroTitle}>Desembolso de préstamo</h1>
           <p style={heroSub}>
-            {application.clientName} · {application.applicationCode}
+            {application.clientName ?? "Cliente"} ·{" "}
+            {application.applicationCode ?? "Sin código"}
           </p>
         </div>
       </div>
 
-      {/* SUMMARY CARDS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: 14,
+        }}
+      >
         <SummaryCard
           label="Monto aprobado"
           value={money(application.approvedAmount)}
@@ -140,12 +185,12 @@ export default function LoanDisbursementPage() {
         />
         <SummaryCard
           label="Plazo"
-          value={`${application.approvedTerm} meses`}
+          value={`${application.approvedTerm ?? 0} meses`}
           color={C.sky}
         />
         <SummaryCard
           label="Tasa"
-          value={`${application.approvedInterestRate}%`}
+          value={`${application.approvedInterestRate ?? 0}%`}
           color={C.gold}
         />
         <SummaryCard
@@ -156,7 +201,6 @@ export default function LoanDisbursementPage() {
         />
       </div>
 
-      {/* TABS */}
       <div style={card}>
         <div style={{ ...cardHead, borderBottom: "none", paddingBottom: 0 }}>
           <div style={{ display: "flex", gap: 4 }}>
@@ -170,6 +214,7 @@ export default function LoanDisbursementPage() {
             >
               Tabla de amortización
             </button>
+
             <button
               type="button"
               onClick={() => setActiveTab("schedule")}
@@ -217,7 +262,9 @@ export default function LoanDisbursementPage() {
                   <div>
                     <strong>Préstamo desembolsado exitosamente</strong>
                     <div style={{ fontSize: 12, marginTop: 2 }}>
-                      El préstamo ha sido creado y desembolsado. Puedes ver el calendario de pagos.
+                      El préstamo
+                      {loan?.id ? ` ${loan.id}` : ""} ha sido creado y
+                      desembolsado. Puedes ver el calendario de pagos.
                     </div>
                   </div>
                 </div>
@@ -248,8 +295,6 @@ export default function LoanDisbursementPage() {
     </div>
   );
 }
-
-// ─── COMPONENTS ───────────────────────────────────────────────────────────────
 
 function CredioMark({ size = 34 }: { size?: number }) {
   return (
@@ -345,29 +390,15 @@ function AmortizationTable({ schedule }: { schedule: Installment[] }) {
         </thead>
         <tbody>
           {schedule.map((row, idx) => (
-            <tr key={idx} style={tbodyRow}>
-              <td style={td}>{row.period}</td>
-              <td
-                style={{
-                  ...td,
-                  textAlign: "right",
-                  fontFamily: fonts.display,
-                  fontWeight: 700,
-                }}
-              >
-                {money(row.payment)}
+            <tr key={`preview-${idx}`} style={tbodyRow}>
+              <td style={td}>{getRowNumber(row, idx)}</td>
+              <td style={{ ...td, textAlign: "right", fontFamily: fonts.display, fontWeight: 700 }}>
+                {money(getRowPayment(row))}
               </td>
-              <td style={{ ...td, textAlign: "right" }}>{money(row.principal)}</td>
-              <td style={{ ...td, textAlign: "right" }}>{money(row.interest)}</td>
-              <td
-                style={{
-                  ...td,
-                  textAlign: "right",
-                  color: C.forest700,
-                  fontWeight: 700,
-                }}
-              >
-                {money(row.balance)}
+              <td style={{ ...td, textAlign: "right" }}>{money(getRowPrincipal(row))}</td>
+              <td style={{ ...td, textAlign: "right" }}>{money(getRowInterest(row))}</td>
+              <td style={{ ...td, textAlign: "right", color: C.forest700, fontWeight: 700 }}>
+                {money(getRowBalance(row))}
               </td>
             </tr>
           ))}
@@ -393,58 +424,47 @@ function PaymentScheduleTable({ schedule }: { schedule: Installment[] }) {
           </tr>
         </thead>
         <tbody>
-          {schedule.map((row) => (
-            <tr key={row.id} style={tbodyRow}>
-              <td style={td}>{row.period}</td>
-              <td style={td}>{fmtDate(row.dueDate)}</td>
-              <td
-                style={{
-                  ...td,
-                  textAlign: "right",
-                  fontFamily: fonts.display,
-                  fontWeight: 700,
-                }}
-              >
-                {money(row.payment)}
-              </td>
-              <td style={{ ...td, textAlign: "right" }}>{money(row.principal)}</td>
-              <td style={{ ...td, textAlign: "right" }}>{money(row.interest)}</td>
-              <td
-                style={{
-                  ...td,
-                  textAlign: "right",
-                  color: C.forest700,
-                  fontWeight: 700,
-                }}
-              >
-                {money(row.balance)}
-              </td>
-              <td style={td}>
-                <span
-                  style={{
-                    ...statusBadge,
-                    ...(row.installmentStatusName === "Pagado"
-                      ? {
-                          background: C.forest50,
-                          color: C.forest700,
-                          borderColor: C.forest100,
-                        }
-                      : {}),
-                  }}
-                >
-                  {row.installmentStatusName || "Pendiente"}
-                </span>
-              </td>
-            </tr>
-          ))}
+          {schedule.map((row, idx) => {
+            const status = getRowStatus(row);
+
+            return (
+              <tr key={`schedule-${idx}`} style={tbodyRow}>
+                <td style={td}>{getRowNumber(row, idx)}</td>
+                <td style={td}>{fmtDate(row.dueDate)}</td>
+                <td style={{ ...td, textAlign: "right", fontFamily: fonts.display, fontWeight: 700 }}>
+                  {money(getRowPayment(row))}
+                </td>
+                <td style={{ ...td, textAlign: "right" }}>{money(getRowPrincipal(row))}</td>
+                <td style={{ ...td, textAlign: "right" }}>{money(getRowInterest(row))}</td>
+                <td style={{ ...td, textAlign: "right", color: C.forest700, fontWeight: 700 }}>
+                  {money(getRowBalance(row))}
+                </td>
+                <td style={td}>
+                  <span
+                    style={{
+                      ...statusBadge,
+                      ...(status.toLowerCase() === "pagado"
+                        ? {
+                            background: C.forest50,
+                            color: C.forest700,
+                            borderColor: C.forest100,
+                          }
+                        : {}),
+                    }}
+                  >
+                    {status}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 }
 
-// ─── STYLES ─────────────────────────────────────────────────────────────────
-const page: React.CSSProperties = {
+const page: CSSProperties = {
   display: "grid",
   gap: 18,
   padding: "clamp(16px, 3vw, 28px)",
@@ -453,7 +473,7 @@ const page: React.CSSProperties = {
   fontFamily: fonts.body,
 };
 
-const nav: React.CSSProperties = {
+const nav: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
@@ -463,7 +483,7 @@ const nav: React.CSSProperties = {
   border: `1px solid ${C.sand200}`,
 };
 
-const backBtn: React.CSSProperties = {
+const backBtn: CSSProperties = {
   padding: "7px 16px",
   borderRadius: 8,
   border: `1px solid ${C.sand200}`,
@@ -475,13 +495,13 @@ const backBtn: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const heroStrip: React.CSSProperties = {
-  background: C.forest900,
+const heroStrip: CSSProperties = {
+  background: (C as Record<string, string>).forest900 ?? C.forest800,
   borderRadius: 14,
   padding: "22px 28px",
 };
 
-const heroTitle: React.CSSProperties = {
+const heroTitle: CSSProperties = {
   fontFamily: fonts.display,
   fontSize: "clamp(20px, 4vw, 26px)",
   fontWeight: 700,
@@ -490,27 +510,27 @@ const heroTitle: React.CSSProperties = {
   letterSpacing: "-.3px",
 };
 
-const heroSub: React.CSSProperties = {
+const heroSub: CSSProperties = {
   fontFamily: fonts.body,
   fontSize: 12,
-  color: C.forest300,
+  color: (C as Record<string, string>).forest300 ?? C.forest100,
   marginTop: 4,
   marginBottom: 0,
 };
 
-const card: React.CSSProperties = {
+const card: CSSProperties = {
   background: C.white,
   borderRadius: 14,
   border: `1px solid ${C.sand200}`,
   overflow: "hidden",
 };
 
-const cardHead: React.CSSProperties = {
+const cardHead: CSSProperties = {
   padding: "18px 22px",
   borderBottom: `1px solid ${C.sand100}`,
 };
 
-const tab: React.CSSProperties = {
+const tab: CSSProperties = {
   padding: "10px 18px",
   borderRadius: "8px 8px 0 0",
   border: "none",
@@ -523,24 +543,24 @@ const tab: React.CSSProperties = {
   transition: "all .15s",
 };
 
-const activeTabStyle: React.CSSProperties = {
+const activeTabStyle: CSSProperties = {
   background: C.cream,
   color: C.sand900,
   fontWeight: 700,
 };
 
-const table: React.CSSProperties = {
+const table: CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
   fontSize: 13,
   fontFamily: fonts.body,
 };
 
-const theadRow: React.CSSProperties = {
+const theadRow: CSSProperties = {
   borderBottom: `2px solid ${C.sand200}`,
 };
 
-const th: React.CSSProperties = {
+const th: CSSProperties = {
   padding: "12px 14px",
   textAlign: "left",
   fontSize: 11,
@@ -550,27 +570,27 @@ const th: React.CSSProperties = {
   letterSpacing: "0.7px",
 };
 
-const tbodyRow: React.CSSProperties = {
+const tbodyRow: CSSProperties = {
   borderBottom: `1px solid ${C.sand100}`,
 };
 
-const td: React.CSSProperties = {
+const td: CSSProperties = {
   padding: "14px 14px",
   color: C.sand900,
 };
 
-const statusBadge: React.CSSProperties = {
+const statusBadge: CSSProperties = {
   padding: "4px 10px",
   borderRadius: 99,
   fontSize: 10,
   fontWeight: 700,
-  background: C.goldSoft,
+  background: (C as Record<string, string>).goldSoft ?? "#FFF4D6",
   color: C.gold,
   border: "1px solid #f0ddb8",
   display: "inline-block",
 };
 
-const btnDisburse: React.CSSProperties = {
+const btnDisburse: CSSProperties = {
   width: "100%",
   padding: "13px",
   borderRadius: 10,
@@ -584,7 +604,7 @@ const btnDisburse: React.CSSProperties = {
   cursor: "pointer",
 };
 
-const successBanner: React.CSSProperties = {
+const successBanner: CSSProperties = {
   marginTop: 16,
   background: C.forest50,
   border: `1px solid ${C.forest100}`,
@@ -598,9 +618,9 @@ const successBanner: React.CSSProperties = {
   alignItems: "flex-start",
 };
 
-const errorBanner: React.CSSProperties = {
+const errorBanner: CSSProperties = {
   marginTop: 12,
-  background: C.coralSoft,
+  background: (C as Record<string, string>).coralSoft ?? "#FFF1F0",
   border: "1px solid #f7c8c5",
   borderRadius: 9,
   padding: "11px 14px",
@@ -611,7 +631,7 @@ const errorBanner: React.CSSProperties = {
   gap: 7,
 };
 
-const muted: React.CSSProperties = {
+const muted: CSSProperties = {
   fontSize: 13,
   color: C.sand400,
   fontFamily: fonts.body,

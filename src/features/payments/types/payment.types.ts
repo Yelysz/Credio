@@ -35,8 +35,9 @@ export interface LoanScheduleResponse {
 
 export interface RegisterPaymentForm {
   loanId: string;
+  collectorCode: string;
   amountPaid: number;
-  paymentMethod: string;
+  paymentMethodId: string;
   latitude?: number;
   longitude?: number;
 }

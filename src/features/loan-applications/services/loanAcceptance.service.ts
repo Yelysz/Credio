@@ -26,6 +26,9 @@ const unwrap = <T>(response: { data: T | ApiEnvelope<T> }): T => {
   return payload as T;
 };
 
+const normalizeStatus = (value?: string | null) =>
+  String(value ?? "").trim().toLowerCase();
+
 export interface SimulateLoanPayload {
   amount: number;
   term: number;
@@ -40,15 +43,29 @@ export const loanAcceptanceService = {
     >("/api/v1/loan-application/all");
 
     const data = unwrap<LoanApplicationItem[]>(response);
-    const list = Array.isArray(data) ? data : [];
+    return Array.isArray(data) ? data : [];
+  },
 
-    const pending = list.filter((item) => {
-      const status = String(item.applicationStatusName ?? "").trim().toLowerCase();
+  async getPending() {
+    const list = await this.getAll();
 
+    return list.filter((item) => {
+      const status = normalizeStatus(item.applicationStatusName);
       return status === "pending" || status === "pendiente";
     });
+  },
 
-    return pending;
+  async getApproved() {
+    const list = await this.getAll();
+
+    return list.filter((item) => {
+      const status = normalizeStatus(item.applicationStatusName);
+      return (
+        status === "approved" ||
+        status === "aprobado" ||
+        status.includes("aprob")
+      );
+    });
   },
 
   async getById(id: string) {

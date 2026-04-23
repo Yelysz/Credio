@@ -47,10 +47,11 @@ export const paymentService = {
   async registerPayment(payload: RegisterPaymentForm) {
     const body = {
       loanId: payload.loanId,
+      collectorCode: payload.collectorCode,
       amountPaid: payload.amountPaid,
-      paymentMethod: payload.paymentMethod,
-      latitude: payload.latitude,
-      longitude: payload.longitude,
+      paymentMethodId: payload.paymentMethodId,
+      gpsLatitude: payload.latitude,
+      gpsLongitude: payload.longitude,
     };
 
     const response = await lendingApi.post<

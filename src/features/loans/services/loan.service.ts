@@ -7,10 +7,6 @@ import type {
   LoanScheduleResponse,
   PreviewAmortizationParams,
 } from "../types/loan.types";
-import type {
-  CreateLoanApplicationPayload,
-  LoanApplication,
-} from "../../loan-applications/types/loanApplication.types";
 
 type ApiEnvelope<T> = {
   detail?: string;
@@ -36,14 +32,6 @@ export const loanService = {
     });
 
     return unwrap<Installment[]>(response.data);
-  },
-
-  async createLoanApplication(payload: CreateLoanApplicationPayload) {
-    const response = await lendingApi.post<
-      ApiEnvelope<LoanApplication> | LoanApplication
-    >("/api/v1/loan-application/create", payload);
-
-    return unwrap<LoanApplication>(response.data);
   },
 
   async createLoan(payload: CreateLoanPayload) {

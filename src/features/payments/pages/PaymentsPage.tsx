@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import jsPDF from "jspdf";
 import { usePayments } from "../hooks/usePayments";
 
 const cardStyle: React.CSSProperties = {
@@ -46,6 +47,20 @@ const formatDate = (value?: string | null) => {
   return date.toLocaleDateString("es-DO");
 };
 
+type ReceiptData = {
+  paymentId: string;
+  receiptNumber: string;
+  message: string;
+  loanId: string;
+  loanCode: string;
+  clientName: string;
+  amountPaid: number;
+  paymentMethod: string;
+  latitude?: number;
+  longitude?: number;
+  registeredAt: string;
+};
+
 export default function PaymentsPage() {
   const {
     installments,
@@ -62,9 +77,11 @@ export default function PaymentsPage() {
   const [search, setSearch] = useState("");
   const [loanId, setLoanId] = useState("");
   const [amountPaid, setAmountPaid] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [paymentMethodId, setPaymentMethodId] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+  const [collectorCode, setCollectorCode] = useState("");
 
   const filteredInstallments = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -95,49 +112,121 @@ export default function PaymentsPage() {
     await fetchLoanSchedule(selectedLoanId);
   };
 
-  const handleRegisterPayment = async () => {
-    const parsedAmount = Number(amountPaid);
-    const parsedLatitude = latitude.trim() ? Number(latitude) : undefined;
-    const parsedLongitude = longitude.trim() ? Number(longitude) : undefined;
+  const generateReceiptPdf = (data: ReceiptData) => {
+    const doc = new jsPDF();
+    let y = 20;
 
-    if (!loanId.trim()) {
-      alert("Debes seleccionar o indicar un préstamo.");
-      return;
-    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Comprobante de pago", 14, y);
 
-    if (!parsedAmount || parsedAmount <= 0) {
-      alert("Debes indicar un monto válido.");
-      return;
-    }
+    y += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text("Credio", 14, y);
 
-    if (parsedLatitude != null && (parsedLatitude < -90 || parsedLatitude > 90)) {
-      alert("La latitud debe estar entre -90 y 90.");
-      return;
-    }
+    y += 10;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(14, y, 196, y);
 
-    if (parsedLongitude != null && (parsedLongitude < -180 || parsedLongitude > 180)) {
-      alert("La longitud debe estar entre -180 y 180.");
-      return;
-    }
+    y += 10;
+    doc.setFont("helvetica", "bold");
+    doc.text("Detalle de la operación", 14, y);
 
-    try {
-      await registerPayment({
-        loanId: loanId.trim(),
-        amountPaid: parsedAmount,
-        paymentMethod,
-        latitude: parsedLatitude,
-        longitude: parsedLongitude,
-      });
+    y += 8;
+    doc.setFont("helvetica", "normal");
 
-      setAmountPaid("");
-      setLatitude("");
-      setLongitude("");
+    const rows = [
+      ["ID del pago", data.paymentId || "No retornado"],
+      ["Número de recibo", data.receiptNumber || "No retornado"],
+      ["Mensaje", data.message || "Operación completada"],
+      ["Fecha de registro", data.registeredAt],
+      ["ID del préstamo", data.loanId],
+      ["Código del préstamo", data.loanCode || "—"],
+      ["Cliente", data.clientName || "—"],
+      ["Monto pagado", money(data.amountPaid)],
+      ["Método de pago", data.paymentMethod],
+      ["Latitud", data.latitude != null ? String(data.latitude) : "—"],
+      ["Longitud", data.longitude != null ? String(data.longitude) : "—"],
+    ];
 
-      alert("Pago registrado correctamente.");
-    } catch {
-      alert("No se pudo registrar el pago.");
-    }
+    rows.forEach(([label, value]) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(`${label}:`, 14, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(String(value), 70, y);
+      y += 8;
+    });
+
+    y += 4;
+    doc.line(14, y, 196, y);
+
+    y += 10;
+    doc.setFontSize(10);
+    doc.text(
+      "Este documento fue generado automáticamente por el sistema.",
+      14,
+      y,
+    );
+
+    const safeReceipt = (
+      data.receiptNumber ||
+      data.paymentId ||
+      "comprobante"
+    ).replace(/[^\w-]/g, "_");
+
+    doc.save(`comprobante_pago_${safeReceipt}.pdf`);
   };
+
+const handleRegisterPayment = async () => {
+  const parsedAmount = Number(amountPaid);
+  const parsedLatitude = latitude.trim() ? Number(latitude) : undefined;
+  const parsedLongitude = longitude.trim() ? Number(longitude) : undefined;
+
+  if (!loanId.trim()) {
+    alert("Debes seleccionar o indicar un préstamo.");
+    return;
+  }
+
+  if (!collectorCode.trim()) {
+    alert("Debes indicar el código del cobrador.");
+    return;
+  }
+
+  if (!parsedAmount || parsedAmount <= 0) {
+    alert("Debes indicar un monto válido.");
+    return;
+  }
+
+  if (parsedLatitude != null && (parsedLatitude < -90 || parsedLatitude > 90)) {
+    alert("La latitud debe estar entre -90 y 90.");
+    return;
+  }
+
+  if (parsedLongitude != null && (parsedLongitude < -180 || parsedLongitude > 180)) {
+    alert("La longitud debe estar entre -180 y 180.");
+    return;
+  }
+
+  try {
+    await registerPayment({
+      loanId: loanId.trim(),
+      collectorCode: collectorCode.trim(),
+      amountPaid: parsedAmount,
+      paymentMethodId:  paymentMethodId.trim(),
+      latitude: parsedLatitude,
+      longitude: parsedLongitude,
+    });
+
+    setAmountPaid("");
+    setLatitude("");
+    setLongitude("");
+
+    alert("Pago registrado correctamente.");
+  } catch {
+    alert("No se pudo registrar el pago.");
+  }
+};
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 24 }}>
@@ -185,16 +274,20 @@ export default function PaymentsPage() {
               <button
                 key={`${item.loanId}-${item.installmentNumber ?? index}`}
                 type="button"
-                onClick={() => item.loanId && void handleSelectLoan(item.loanId)}
+                onClick={() =>
+                  item.loanId && void handleSelectLoan(item.loanId)
+                }
                 style={{
                   textAlign: "left",
                   borderRadius: 16,
-                  border: selectedLoan?.loanId === item.loanId
-                    ? "1px solid #0F766E"
-                    : "1px solid #E2E8F0",
-                  background: selectedLoan?.loanId === item.loanId
-                    ? "#F0FDFA"
-                    : "#FFFFFF",
+                  border:
+                    selectedLoan?.loanId === item.loanId
+                      ? "1px solid #0F766E"
+                      : "1px solid #E2E8F0",
+                  background:
+                    selectedLoan?.loanId === item.loanId
+                      ? "#F0FDFA"
+                      : "#FFFFFF",
                   padding: 18,
                   cursor: "pointer",
                 }}
@@ -219,12 +312,26 @@ export default function PaymentsPage() {
                       {item.clientName || "Cliente sin nombre"}
                     </div>
 
-                    <div style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}>
-                      Préstamo: <strong>{item.loanCode || item.loanId || "—"}</strong>
+                    <div
+                      style={{
+                        fontSize: 14,
+                        color: "#334155",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Préstamo:{" "}
+                      <strong>{item.loanCode || item.loanId || "—"}</strong>
                     </div>
 
-                    <div style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}>
-                      Cuota #{item.installmentNumber ?? "—"} · vence {formatDate(item.dueDate)}
+                    <div
+                      style={{
+                        fontSize: 14,
+                        color: "#334155",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Cuota #{item.installmentNumber ?? "—"} · vence{" "}
+                      {formatDate(item.dueDate)}
                     </div>
 
                     <div style={{ fontSize: 14, color: "#334155" }}>
@@ -280,10 +387,20 @@ export default function PaymentsPage() {
         </div>
 
         <div style={{ marginBottom: 16 }}>
+          <label style={labelStyle}>Código del cobrador</label>
+          <input
+            value={collectorCode}
+            onChange={(e) => setCollectorCode(e.target.value)}
+            style={inputStyle}
+            placeholder="Ej: COL-001"
+          />
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
           <label style={labelStyle}>Método de pago</label>
           <select
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
+            value={paymentMethodId}
+            onChange={(e) => setPaymentMethodId(e.target.value)}
             style={inputStyle}
           >
             <option value="Cash">Efectivo</option>
@@ -292,7 +409,14 @@ export default function PaymentsPage() {
           </select>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 12,
+            marginBottom: 20,
+          }}
+        >
           <div>
             <label style={labelStyle}>Latitud (opcional)</label>
             <input
@@ -358,6 +482,25 @@ export default function PaymentsPage() {
             <div style={{ marginTop: 4, fontSize: 14 }}>
               Mensaje: {paymentResult.message || "Operación completada"}
             </div>
+
+            {receiptData && (
+              <button
+                type="button"
+                onClick={() => generateReceiptPdf(receiptData)}
+                style={{
+                  marginTop: 12,
+                  padding: "10px 14px",
+                  borderRadius: 12,
+                  border: "1px solid #059669",
+                  background: "#FFFFFF",
+                  color: "#065F46",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Descargar comprobante PDF
+              </button>
+            )}
           </div>
         )}
 
@@ -377,14 +520,25 @@ export default function PaymentsPage() {
         )}
 
         <div style={{ marginTop: 28 }}>
-          <h3 style={{ color: "#0F172A", marginBottom: 12 }}>Calendario del préstamo</h3>
+          <h3 style={{ color: "#0F172A", marginBottom: 12 }}>
+            Calendario del préstamo
+          </h3>
 
           {!selectedLoan ? (
-            <p style={mutedText}>Selecciona una cuota de la lista para ver el calendario.</p>
+            <p style={mutedText}>
+              Selecciona una cuota de la lista para ver el calendario.
+            </p>
           ) : isScheduleLoading ? (
             <p style={mutedText}>Cargando calendario...</p>
           ) : (
-            <div style={{ display: "grid", gap: 12, maxHeight: 360, overflowY: "auto" }}>
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                maxHeight: 360,
+                overflowY: "auto",
+              }}
+            >
               {(selectedLoan.installments ?? []).map((item, index) => (
                 <div
                   key={`${item.installmentNumber ?? index}-${item.dueDate ?? index}`}
@@ -409,19 +563,29 @@ export default function PaymentsPage() {
                     <span style={mutedText}>{item.status || "Pendiente"}</span>
                   </div>
 
-                  <div style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}>
+                  <div
+                    style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}
+                  >
                     Vence: <strong>{formatDate(item.dueDate)}</strong>
                   </div>
-                  <div style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}>
+                  <div
+                    style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}
+                  >
                     Pago: <strong>{formatDate(item.paymentDate)}</strong>
                   </div>
-                  <div style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}>
+                  <div
+                    style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}
+                  >
                     Capital: <strong>{money(item.principal)}</strong>
                   </div>
-                  <div style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}>
+                  <div
+                    style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}
+                  >
                     Interés: <strong>{money(item.interest)}</strong>
                   </div>
-                  <div style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}>
+                  <div
+                    style={{ fontSize: 14, color: "#334155", marginBottom: 4 }}
+                  >
                     Cuota: <strong>{money(item.installmentAmount)}</strong>
                   </div>
                   <div style={{ fontSize: 14, color: "#334155" }}>
